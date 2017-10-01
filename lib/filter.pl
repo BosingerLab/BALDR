@@ -74,4 +74,3 @@ while(my $ln =<IN>)
 }
 print "Results written to $out_path/IgBLAST_quant_sorted_filtered/$file\.filtered\n";
 
-print "Results written to $out_path/IgBLAST_quant_sorted_filtered/$file\.filtered\n";
