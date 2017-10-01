@@ -29,10 +29,11 @@ GetOptions(
   'igblast=s' => \my $igblast_path,
   'organism=s' => \ (my $organism="human"),
   'BALDR=s' => \my $BALDR_path,
-  'memory' => \ (my $memory="32GB"),
+  'STAR_index=s' => \my $STAR_index,
+  'memory' => \ (my $memory="32G"),
   'output' => \my $outdir,
   'version|V' => \ my $version,
-  'help|?' => \$help
+  'help|?' => \my $help
 
 ) or pod2usage(2); # die "Invalid options passed to $0\n";
 
@@ -99,6 +100,104 @@ pod2usage(-message=>"\nERROR: Please enter the path for the trimmomatic jar file
 pod2usage(-message=>"\nERROR: Please enter the path for the IgBLAST folder\n") unless $igblast_path;
 pod2usage(-message=>"\nERROR: Please enter the path for the BALDR folder\n") unless $BALDR_path;
 pod2usage(-message=>"\nERROR: Please enter the organism - human or rhesus_monkey\n") unless $organism;
+
+
+
+###########################################################################################################################
+# Build resources
+###########################################################################################################################
+
+# Build Recombinome
+
+if($organism eq "human" && $method=~/Recombinome/)
+{
+	if(!(-e "$BALDR_path/resources/Recombinome/human/Recombined_IG_Heavy_N10.1.bt2"))
+	{
+		print strftime("%Y-%m-%d %H:%M:%S\tBuilding Recombinome for Heavy chain\n", localtime(time));	
+
+		if(-e "$BALDR_path/resources/Recombinome/human/Recombined_IG_Heavy_N10.fa.gz")
+		{
+			system "gunzip $BALDR_path/resources/Recombinome/human/Recombined_IG_Heavy_N10.fa.gz";
+		}
+		if(-e "$BALDR_path/resources/Recombinome/human/Recombined_IG_Heavy_N10.fa")
+		{
+			system "bowtie2-build $BALDR_path/resources/Recombinome/human/Recombined_IG_Heavy_N10.fa $BALDR_path/resources/Recombinome/human/Recombined_IG_Heavy_N10";
+		}
+		else
+		{
+			print "ERROR: Could not find the fasta file $BALDR_path/resources/Recombinome/human/Recombined_IG_Heavy_N10.fa to build Recombinome for Heavy chain\n";
+			exit;
+		}
+	}
+
+	if(!(-e "$BALDR_path/resources/Recombinome/human/Recombined_IG_Light.1.bt2"))
+	{
+		print strftime("%Y-%m-%d %H:%M:%S\tBuilding Recombinome for Light chain\n", localtime(time));	
+
+		if(-e "$BALDR_path/resources/Recombinome/human/Recombined_IG_Light.fa.gz")
+		{
+			system "gunzip $BALDR_path/resources/Recombinome/human/Recombined_IG_Light.fa.gz";
+		}
+		if(-e "$BALDR_path/resources/Recombinome/human/Recombined_IG_Light.fa")
+		{
+			system "bowtie2-build $BALDR_path/resources/Recombinome/human/Recombined_IG_Light.fa $BALDR_path/resources/Recombinome/human/Recombined_IG_Light";
+		}
+		else
+		{
+			print "ERROR: Could not find the fasta file $BALDR_path/resources/Recombinome/human/Recombined_IG_Light.fato build Recombinome for Light chain\n";
+			exit;
+		}
+	}
+}
+
+# Build STAR genome for human
+
+if(!($STAR_index))
+{
+	if($organism eq "human" && $method=~/IG/ && !(-e "$BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaMv7/SA"))
+	{
+		print strftime("%Y-%m-%d %H:%M:%S\tBuilding rhesus_monkey genome index for STAR\n", localtime(time));	
+
+	    if(!(glob "$BALDR_path/resources/STAR_genomes/human/Homo_sapiens.GRCh38.dna.primary_assembly.fa*"))
+	    {
+	    	print strftime("%Y-%m-%d %H:%M:%S\tDownloading genome fasta file\n", localtime(time));	
+			system "wget ftp://ftp.ensembl.org/pub/release-86/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz -P $BALDR_path/resources/STAR_genomes/human/";
+			system "gunzip $BALDR_path/resources/STAR_genomes/human/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz";
+		}
+		
+		if(!(glob "$BALDR_path/resources/STAR_genomes/human/Homo_sapiens.GRCh38.86.gtf*"))
+		{
+			print strftime("%Y-%m-%d %H:%M:%S\tDownloading GTF file\n", localtime(time));	
+			system "wget ftp://ftp.ensembl.org/pub/release-86/gtf/homo_sapiens/Homo_sapiens.GRCh38.86.gtf.gz -P $BALDR_path/resources/STAR_genomes/human/";
+			system "gunzip $BALDR_path/resources/STAR_genomes/human/Homo_sapiens.GRCh38.86.gtf.gz";
+		}
+		
+		print strftime("%Y-%m-%d %H:%M:%S\tRunning STAR to build index\n", localtime(time));	
+		print "STAR --runThreadN $threads --runMode genomeGenerate --genomeDir $BALDR_path/resources/STAR_genomes/human/GRCh38_primary_ensembl86 --genomeFastaFiles $BALDR_path/resources/STAR_genomes/human/Homo_sapiens.GRCh38.dna.primary_assembly.fa --sjdbGTFfile $BALDR_path/resources/STAR_genomes/human/Homo_sapiens.GRCh38.86.gtf --sjdbOverhang 100\n";
+		system "STAR --runThreadN $threads --runMode genomeGenerate --genomeDir $BALDR_path/resources/STAR_genomes/human/GRCh38_primary_ensembl86 --genomeFastaFiles $BALDR_path/resources/STAR_genomes/human/Homo_sapiens.GRCh38.dna.primary_assembly.fa --sjdbGTFfile $BALDR_path/resources/STAR_genomes/human/Homo_sapiens.GRCh38.86.gtf --sjdbOverhang 100";
+	}
+	elsif($organism eq "rhesus_monkey" && $method=~/IG/ && !(-e "$BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaMv7/SA"))
+	{
+		print strftime("%Y-%m-%d %H:%M:%S\tBuilding rhesus_monkey genome index for STAR\n", localtime(time));	
+
+		if(!(glob "$BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaM_Rhesus_Genome_v7.fasta*"))
+	    {
+			print strftime("%Y-%m-%d %H:%M:%S\tDownloading genome fasta file\n", localtime(time));	
+			system "wget https://www.unmc.edu/rhesusgenechip/MacaM_Rhesus_Genome_v7.fasta.bz2 -P $BALDR_path/resources/STAR_genomes/rhesus_monkey/";
+			system "bunzip2 $BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaM_Rhesus_Genome_v7.fasta.bz2";
+		}
+
+		if(!(glob "$BALDR_path/resources/STAR_genomes/rhesus_monkey/*gtf"))
+	    {
+			print strftime("%Y-%m-%d %H:%M:%S\tDownloading GTF file\n", localtime(time));	
+			system "wget https://www.unmc.edu/rhesusgenechip/RhesusGenomeUpload/MacaM_Rhesus_Genome_Annotation_v7.8.2.gtf -P $BALDR_path/resources/STAR_genomes/rhesus_monkey/";
+		}
+		
+		print strftime("%Y-%m-%d %H:%M:%S\tRunning STAR to build index\n", localtime(time));	
+		print "STAR --runThreadN $threads --runMode genomeGenerate --genomeDir $BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaMv7 --genomeFastaFiles $BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaM_Rhesus_Genome_v7.fasta --sjdbGTFfile $BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaM_Rhesus_Genome_Annotation_v7.8.2.gtf --sjdbOverhang 100\n";
+		system "STAR --runThreadN $threads --runMode genomeGenerate --genomeDir $BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaMv7 --genomeFastaFiles $BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaM_Rhesus_Genome_v7.fasta --sjdbGTFfile $BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaM_Rhesus_Genome_Annotation_v7.8.2.gtf --sjdbOverhang 100";
+	}
+}
 
 
 ###########################################################################################################################
@@ -170,6 +269,8 @@ if($method =~/IG-mapped/ || $method=~/FilterNonIG/)
 		$genomeDir .= "rhesus_monkey/MacaMv7";
 		$IG_loci .= "rhesus_monkey/IG_loci_rhesus_monkey.txt";
 	}
+
+	$genomeDir = $STAR_index if $STAR_index; 
 
 	my $input_reads;
 	if($single) 
@@ -663,22 +764,21 @@ BALDR
 
 BALDR <input files> <options>
 
-  --single,-s     fastq.gz file for single-end run (-s or -p required)
-  --paired,-p     fastq.gz files for paired-end run. File names must be separated by comma (e.g. --paired R1.fastq.gz,R2.fastq.gz) (-s or -p required)
-  --methods       One or more reconstruction methods. For multiple methods, separte only by comma
+  --single       fastq.gz file for single-end run (-s or -p required)
+  --paired       fastq.gz files for paired-end run. File names must be separated by comma (e.g. --paired R1.fastq.gz,R2.fastq.gz) (-s or -p required)
+  --methods      One or more reconstruction methods. For multiple methods, separte only by comma
   		  human: IG-mapped_Unmapped (default), Unfiltered, IG-mapped_only, IMGT-mapped, Recombinome-mapped 
   		  rhesus_monkey: FilterNonIG (default), Unfiltered, IG-mapped_only, IG-mapped_Unmapped
   --organism,-o   human (default) or rhesus_monkey
   --trimmomatic   Path for trimmomatic.jar file (e.g. ~/Trimmomatic-0.36/trimmomatic-0.36.jar) (required)
   --adapter,-a    Path for the Trimmomatic adapter file (e.g. ~/Trimmomatic-0.36/adapters/NexteraPE-PE.fa) (required)
+  --STAR_index    Path for the STAR aligner genome index
   --BALDR         Path for the BALDR directory (e.g. ~/BALDR) (required)
   --igblast,-i    Path for the IgBLAST folder (e.g. ~/ncbi-igblast-1.6.1) (required)
-  --memory        Max memory for Trinity (default 32GB)
+  --memory        Max memory for Trinity (default 32G)
   --threads,-t    number of threads for STAR/bowtie2/Trinity (default 1)
   --version ,-V   Version
   --help,-h       Print this help
 
 =cut
 
-
-#--outdir,-o     Path for output files (default current directory)
