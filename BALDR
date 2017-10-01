@@ -749,7 +749,6 @@ sub sort_models
 sub filter
 {
 	my ($file,$out) = @_;	
-	print "$file $out\n";
 	system "$BALDR_path/lib/filter.pl $file $out";
 }
 
