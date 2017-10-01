@@ -27,7 +27,7 @@ Clone or download the BALDRv1.0 package.
 
 ## Command line usage
 ```
-BALDR <input files> <options>`
+BALDR <input files> <options>
 
   --single        fastq.gz file for single-end run (--single or -paired required)
   --paired        fastq.gz files for paired-end run. File names must be separated by comma 
