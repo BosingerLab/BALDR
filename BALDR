@@ -1,0 +1,684 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use Getopt::Long;
+use POSIX qw/strftime/;
+use Pod::Usage;
+
+# Prerequisites
+
+# Trimmomatic-0.32
+# igblast 1.6.1
+# bowtie2 2.2.9
+# seqtk
+# samtools
+
+
+
+###########################################################################################################################
+# Input
+###########################################################################################################################
+
+GetOptions(
+  'single=s' => \my $single,
+  'paired=s' => \my $paired,
+  'threads=i' => \ (my $threads=1),
+  'trimmomatic=s' => \my $trimmomatic_jar,
+  'adapters=s' => \my $adapter_file,
+  'method=s' => \my $method, # comma separated human: IG-mapped_only, IG-mapped_Unmapped, IMGT-mapped, Recombinome-mapped, Unfiltered; rhesus_monkey: IG-mapped_only, IG-mapped_Unmapped, FilterNonIG, Unfiltered
+  'igblast=s' => \my $igblast_path,
+  'organism=s' => \ (my $organism="human"),
+  'BALDR=s' => \my $BALDR_path,
+  'memory' => \ (my $memory="32GB"),
+  'output' => \my $outdir,
+  'version|V' => \ my $version,
+  'help|?' => \$help
+
+) or pod2usage(2); # die "Invalid options passed to $0\n";
+
+ pod2usage(1,-verbose => 0) if $help;
+
+ if($version)
+ {
+ 	print "BALDR v1.0\n";
+ 	exit;
+ }
+
+# Default values
+if(!($method))
+{
+	if($organism eq "human") {$method = "IG-mapped_Unmapped";}	
+	if($organism eq "rhesus_monkey") {$method = "FilterNonIG";}
+}
+
+# Check organism and method
+
+my %allowed_method;
+%{$allowed_method{"human"}}= ("IG-mapped_only" => 1, "IG-mapped_Unmapped" => 1, "IMGT-mapped" => 1, "Recombinome-mapped" => 1, "Unfiltered" => 1);
+%{$allowed_method{"rhesus_monkey"}}= ("IG-mapped_only" => 1, "IG-mapped_Unmapped" => 1, "FilterNonIG" => 1, "Unfiltered" => 1);
+
+my @methods = split(",",$method);
+foreach my $mtd(@methods)
+{
+	pod2usage(-message=>"\nERROR: Please check the method name. BALDR presently supports following methods:\nhuman: IG-mapped_only, IG-mapped_Unmapped, IMGT-mapped, Recombinome-mapped, Unfiltered\nrhesus_monkey: IG-mapped_only, IG-mapped_Unmapped, FilterNonIG, Unfiltered\n") unless $allowed_method{$organism}{$mtd};
+}
+
+
+# Check input read files
+
+my $read1_file;
+my $read2_file;
+
+my $sample;
+
+if($single && $paired)
+{
+	pod2usage(-message=>"\nERROR: Please enter either single or paired read files\n");
+}
+
+if($single && $single =~/((\S+)_R\d_001.fastq.gz)/)
+{
+	$read1_file = $1;
+	$sample = $2;
+}
+elsif($paired && $paired=~/((.*?)_R\d_001.fastq.gz)\,(.*fastq.gz)/)
+{
+	$read1_file = $1;
+	$read2_file = $3; 
+	$sample = $2;
+}
+else
+{
+	pod2usage(-message=>"\nERROR: Missing input files. Please enter the compressed fastq.gz file/s. Please note the file names should end in \".fastq.gz\". For paired end, the files must be separated only by a comma.\n");
+}	
+
+
+# Get requireed arguments
+pod2usage(-message=>"\nERROR: Please enter the path for the trimmomatic adapter file\n") unless $adapter_file;
+pod2usage(-message=>"\nERROR: Please enter the path for the trimmomatic jar file\n") unless $trimmomatic_jar;
+pod2usage(-message=>"\nERROR: Please enter the path for the IgBLAST folder\n") unless $igblast_path;
+pod2usage(-message=>"\nERROR: Please enter the path for the BALDR folder\n") unless $BALDR_path;
+pod2usage(-message=>"\nERROR: Please enter the organism - human or rhesus_monkey\n") unless $organism;
+
+
+###########################################################################################################################
+# Trimmomatic - remove adapter sequences
+###########################################################################################################################
+
+if(glob "Trimmed/$sample\_nexteratrim*fastq.gz")
+{
+	print strftime("%Y-%m-%d %H:%M:%S\tSkipping Trimmomatic. Found Trimmed files\n", localtime(time));	
+}
+else
+{
+	print strftime("%Y-%m-%d %H:%M:%S\t", localtime(time));
+	print "Starting Trimmomatic to remove adapters\n";
+
+	system "mkdir -p Trimmed/Log";
+
+	if($single)
+	{
+		print "java -jar $trimmomatic_jar SE -threads $threads -trimlog Trimmed/Log/$sample\_trim.log $read1_file Trimmed/$sample\_nexteratrim.fastq.gz ILLUMINACLIP:$adapter_file:2:30:10\n";
+		system "java -jar $trimmomatic_jar SE -threads $threads -trimlog Trimmed/Log/$sample\_trim.log $read1_file Trimmed/$sample\_nexteratrim.fastq.gz ILLUMINACLIP:$adapter_file:2:30:10\n";
+	}
+	elsif($paired) 
+	{
+		print "java -jar $trimmomatic_jar PE -threads $threads -trimlog Trimmed/Log/$sample\_trim.log $read1_file $read2_file Trimmed/$sample\_nexteratrim_1P.fastq.gz Trimmed/$sample\_nexteratrim_1U.fastq.gz Trimmed/$sample\_nexteratrim_2P.fastq.gz Trimmed/$sample\_nexteratrim_2U.fastq.gz ILLUMINACLIP:$adapter_file:2:30:10\n";
+		system "java -jar $trimmomatic_jar PE -threads $threads -trimlog Trimmed/Log/$sample\_trim.log $read1_file $read2_file Trimmed/$sample\_nexteratrim_1P.fastq.gz Trimmed/$sample\_nexteratrim_1U.fastq.gz Trimmed/$sample\_nexteratrim_2P.fastq.gz Trimmed/$sample\_nexteratrim_2U.fastq.gz ILLUMINACLIP:$adapter_file:2:30:10\n";
+	}  
+
+	print strftime("%Y-%m-%d %H:%M:%S\tFinished Trimmomatic to remove adapters\n", localtime(time));
+}
+
+my $read1_file_trimmed;
+my $read2_file_trimmed;
+
+if($single)
+{
+	$read1_file_trimmed = "Trimmed/$sample\_nexteratrim.fastq.gz";	
+}
+elsif($paired)
+{
+	$read1_file_trimmed = "Trimmed/$sample\_nexteratrim_1P.fastq.gz";	
+	$read2_file_trimmed = "Trimmed/$sample\_nexteratrim_2P.fastq.gz";	
+}
+
+if(!(-e $read1_file_trimmed)) {die "Cannot fine Trimmed files\n";}
+
+
+###########################################################################################################################
+# Filtering 
+###########################################################################################################################
+
+#==========================================================================================================================
+# IG-mapped / IG-mapped+Unmapped / FilterNonIG
+#==========================================================================================================================
+
+if($method =~/IG-mapped/ || $method=~/FilterNonIG/)
+{
+	my $genomeDir = "$BALDR_path/resources/STAR_genomes/";
+	my $IG_loci = "$BALDR_path/resources/IG_loci/";
+	my $nonIG_loci = "$BALDR_path/resources/IG_loci/rhesus_monkey/MacaMv7.8.2_noIG.bed"; # only for rhesus_monkey FilterNonIG
+
+	if($organism eq "human")
+	{
+		$genomeDir .= "human/GRCh38_primary_ensembl86";
+		$IG_loci .= "human/IG_loci_human.txt";
+	}
+	elsif($organism eq "rhesus_monkey")
+	{
+		$genomeDir .= "rhesus_monkey/MacaMv7";
+		$IG_loci .= "rhesus_monkey/IG_loci_rhesus_monkey.txt";
+	}
+
+	my $input_reads;
+	if($single) 
+	{
+		$input_reads = "$read1_file_trimmed";
+	}
+	else 
+	{
+		$input_reads = "$read1_file_trimmed $read2_file_trimmed";
+	} 
+	system "mkdir -p STAR";
+
+	
+	if(glob "STAR/$sample\.*sorted.bam")
+	{
+		print strftime("%Y-%m-%d %H:%M:%S\tSkipping STAR. Found bam file\n", localtime(time));	
+	}
+	else
+	{
+		print strftime("%Y-%m-%d %H:%M:%S\tStarting STAR\n", localtime(time));
+
+		# Align to reference
+
+		print "STAR --genomeDir $genomeDir --genomeLoad LoadAndKeep --readFilesIn $input_reads --readFilesCommand zcat --runThreadN $threads --outStd BAM_SortedByCoordinate --outSAMtype BAM SortedByCoordinate --outSAMmode Full  --limitBAMsortRAM 20000000000 --outSAMattributes All --outSAMstrandField intronMotif --outSAMunmapped Within --outReadsUnmapped Fastx --quantMode GeneCounts --outFileNamePrefix STAR/$sample\.STAR. 1> STAR/$sample\.STAR.sorted.bam\n";
+		system "STAR --genomeDir $genomeDir --genomeLoad LoadAndKeep --readFilesIn $input_reads --readFilesCommand zcat --runThreadN $threads --outStd BAM_SortedByCoordinate --outSAMtype BAM SortedByCoordinate --outSAMmode Full  --limitBAMsortRAM 20000000000 --outSAMattributes All --outSAMstrandField intronMotif --outSAMunmapped Within --outReadsUnmapped Fastx --quantMode GeneCounts --outFileNamePrefix STAR/$sample\.STAR. 1> STAR/$sample\.STAR.sorted.bam";
+
+		print "samtools index STAR/$sample\.STAR.sorted.bam\n";
+		system "samtools index STAR/$sample\.STAR.sorted.bam";
+
+		print strftime("%Y-%m-%d %H:%M:%S\tFinished STAR.\n", localtime(time));
+	}
+
+	if($method=~/FilterNonIG/)
+	{
+		system "mkdir -p FilterNonIG/Filtered_reads";
+		system "mkdir -p FilterNonIG/Filtered_fastq";
+
+		system "samtools view STAR/$sample\.STAR.sorted.bam -L $nonIG_loci -U FilterNonIG/$sample\.remnonIG.sam > /dev/null";
+		system "cut -f 1  FilterNonIG/$sample\.remnonIG.sam | sort -u > FilterNonIG/Filtered_reads/$sample\.remnonIG.listreads";
+
+		if($single)
+		{
+			print "seqtk subseq $read1_file_trimmed FilterNonIG/Filtered_reads/$sample\.remnonIG.listreads | gzip  > FilterNonIG/Filtered_fastq/$sample\.FilterNonIG.fastq.gz\n";
+		 	system "seqtk subseq $read1_file_trimmed FilterNonIG/Filtered_reads/$sample\.remnonIG.listreads | gzip  > FilterNonIG/Filtered_fastq/$sample\.FilterNonIG.fastq.gz";
+		 	reconstructIg("FilterNonIG/Filtered_fastq/$sample\.FilterNonIG.fastq.gz","FilterNonIG");
+		}
+		else
+		{
+
+		 	print "seqtk subseq $read1_file_trimmed FilterNonIG/Filtered_reads/$sample\.remnonIG.listreads | gzip  > FilterNonIG/Filtered_fastq/$sample\_1P.FilterNonIG.fastq.gz\n";
+		 	system "seqtk subseq $read1_file_trimmed FilterNonIG/Filtered_reads/$sample\.remnonIG.listreads | gzip  > FilterNonIG/Filtered_fastq/$sample\_1P.FilterNonIG.fastq.gz";
+
+		  	print "seqtk subseq $read1_file_trimmed FilterNonIG/Filtered_reads/$sample\.remnonIG.listreads | gzip  > FilterNonIG/Filtered_fastq/$sample\_2P.FilterNonIG.fastq.gz\n";
+		 	system "seqtk subseq $read1_file_trimmed FilterNonIG/Filtered_reads/$sample\.remnonIG.listreads | gzip  > FilterNonIG/Filtered_fastq/$sample\_2P.FilterNonIG.fastq.gz";
+
+		 	reconstructIg("FilterNonIG/Filtered_fastq/$sample\_1P.FilterNonIG.fastq.gz,FilterNonIG/Filtered_fastq/$sample\_2P.FilterNonIG.fastq.gz","FilterNonIG");
+		}
+	}
+	
+	system "mkdir -p IG-mapped/IG_reads";
+	system "mkdir -p IG-mapped/IG_fastq";
+
+	# Get list of reads mapping to Ig loci
+
+	if(glob "IG-mapped/IG_reads/$sample\.*listreads")
+	{
+		print strftime("%Y-%m-%d %H:%M:%S\tSkipping extracting reads. Found listreads file in IG-mapped/IG_reads\n", localtime(time));	
+	}
+	else
+	{
+		print strftime("%Y-%m-%d %H:%M:%S\tExtracting IG reads in IG-mapped/IG_reads.\n", localtime(time));
+
+		print "cat $IG_loci | xargs samtools view -b STAR/$sample\.STAR.sorted.bam | samtools view - | cut -f 1 | sort -u > IG-mapped/IG_reads/$sample\.listreads\n";
+		system "cat $IG_loci | xargs samtools view -b STAR/$sample\.STAR.sorted.bam | samtools view - | cut -f 1 | sort -u > IG-mapped/IG_reads/$sample\.listreads";
+	}
+
+
+	# Extract fastq file
+	
+	if(glob "IG-mapped/IG_fastq/$sample\*.fastq*")
+	{
+		print strftime("%Y-%m-%d %H:%M:%S\tSkipping extracting IG fastq file. Found fastq.gz file in IG-mapped/IG_fastq\n", localtime(time));	
+	}
+	else
+	{
+		print strftime("%Y-%m-%d %H:%M:%S\tExtracting IG fastq file in IG-mapped/IG_fastq.\n", localtime(time));
+
+		if($single)
+		{
+			print "seqtk subseq $read1_file_trimmed IG-mapped/IG_reads/$sample\.listreads | gzip  > IG-mapped/IG_fastq/$sample\.IG.fastq.gz\n";
+		 	system "seqtk subseq $read1_file_trimmed IG-mapped/IG_reads/$sample\.listreads | gzip  > IG-mapped/IG_fastq/$sample\.IG.fastq.gz";
+
+		}
+		else
+		{
+		  	print "seqtk subseq $read1_file_trimmed IG-mapped/IG_reads/$sample\.listreads  | sed -e \"s/\\s.*//\" | gzip > IG-mapped/IG_fastq/$sample\_1P.IG.fastq.gz\n";
+		  	system "seqtk subseq $read1_file_trimmed IG-mapped/IG_reads/$sample\.listreads | sed -e \"s/\\s.*//\" | gzip  > IG-mapped/IG_fastq/$sample\_1P.IG.fastq.gz";
+
+		  	print "seqtk subseq $read2_file_trimmed IG-mapped/IG_reads/$sample\.listreads | sed -e \"s/\\s.*//\" | gzip > IG-mapped/IG_fastq/$sample\_2P.IG.fastq.gz\n";
+		  	system "seqtk subseq $read2_file_trimmed IG-mapped/IG_reads/$sample\.listreads | sed -e \"s/\\s.*//\" | gzip > IG-mapped/IG_fastq/$sample\_2P.IG.fastq.gz";
+		}
+	}
+
+	# Add Unmapped
+	if($method =~ /IG-mapped_Unmapped/)
+	{
+		system "mkdir -p IG-mapped_Unmapped/IG-mapped_Unmapped_fastq";
+
+		# Merge IG & UNmapped reads
+		
+		if(glob "IG-mapped_Unmapped/IG-mapped_Unmapped_fastq/$sample\*IG_Unmapped.fastq.gz")
+		{
+			print strftime("%Y-%m-%d %H:%M:%S\tSkipping merging IG & Unmapped reads. Found fastq.gz file in IG-mapped_Unmapped/IG-mapped_Unmapped_fastq\n", localtime(time));	
+		}
+		else
+		{
+			print strftime("%Y-%m-%d %H:%M:%S\tMerging IG & Unmapped reads and writing to IG-mapped_Unmapped/IG-mapped_Unmapped_fastq\n", localtime(time));	
+			if($single)
+			{
+				system "gzip STAR/$sample\.STAR.Unmapped.out.mate1";
+				system "zcat IG-mapped/IG_fastq/$sample\.IG.fastq.gz STAR/$sample\.STAR.Unmapped.out.mate1.gz | gzip > IG-mapped_Unmapped/IG-mapped_Unmapped_fastq/$sample\.IG_Unmapped.fastq.gz";
+			}
+			else
+			{
+				system "sed -e \"s/\\s.*//\" STAR/$sample\.STAR.Unmapped.out.mate1 | gzip > STAR/$sample\.STAR.Unmapped.out.mate1.gz";
+				system "sed -e \"s/\\s.*//\" STAR/$sample\.STAR.Unmapped.out.mate2 | gzip > STAR/$sample\.STAR.Unmapped.out.mate2.gz";
+				system "zcat IG-mapped/IG_fastq/$sample\_1P.IG.fastq.gz STAR/$sample\.STAR.Unmapped.out.mate1.gz | gzip  > IG-mapped_Unmapped/IG-mapped_Unmapped_fastq/$sample\_1P.IG_Unmapped.fastq.gz";
+				system "zcat IG-mapped/IG_fastq/$sample\_2P.IG.fastq.gz STAR/$sample\.STAR.Unmapped.out.mate2.gz | gzip  > IG-mapped_Unmapped/IG-mapped_Unmapped_fastq/$sample\_2P.IG_Unmapped.fastq.gz";
+			}
+		}
+	}
+
+	# Call reconstructIg
+	if($method =~ "IG-mapped_Unmapped")
+	{
+		if($single)
+		{
+			reconstructIg("IG-mapped_Unmapped/IG-mapped_Unmapped_fastq/$sample\.IG_Unmapped.fastq.gz","IG-mapped_Unmapped");
+		}
+		else
+		{
+			reconstructIg("IG-mapped_Unmapped/IG-mapped_Unmapped_fastq/$sample\_1P.IG_Unmapped.fastq.gz,IG-mapped_Unmapped/IG-mapped_Unmapped_fastq/$sample\_2P.IG_Unmapped.fastq.gz","IG-mapped_Unmapped");	
+		}	
+	}	
+	if($method =~ "IG-mapped_only")
+	{
+		if($single)
+		{
+			reconstructIg("IG-mapped/IG_fastq/$sample\.IG.fastq.gz","IG-mapped");
+		}
+		else
+		{
+			reconstructIg("IG-mapped/IG_fastq/$sample\_1P.IG.fastq.gz,IG-mapped/IG_fastq/$sample\_2P.IG.fastq.gz","IG-mapped");	
+		}
+	}
+}
+
+
+#==========================================================================================================================
+# Unfiltered
+#==========================================================================================================================
+
+if($method=~/Unfiltered/)
+{
+	system "mkdir -p Unfiltered";
+	if($single)
+	{
+		reconstructIg("$read1_file_trimmed","Unfiltered");
+	}
+	else
+	{
+		reconstructIg("$read1_file_trimmed,$read2_file_trimmed","Unfiltered");
+	}
+}
+
+#==========================================================================================================================
+# IMGT
+#==========================================================================================================================
+
+if($method=~/IMGT/)
+{
+	system "mkdir -p IMGT-mapped";
+
+	my $imgt_IGH = "$BALDR_path/resources/IMGT/human/IGH_VJC";
+	my $imgt_IGKL = "$BALDR_path/resources/IMGT/human/IGKL_VJC";
+
+	if($single)
+	{
+		my $input_reads = "-U $read1_file_trimmed";
+		
+		print "bowtie2 -p $threads --no-unal -k 1 --local --al-gz IMGT-mapped/$sample\.IMGT-mapped_IGH.fastq.gz -x $imgt_IGH $input_reads > /dev/null 2> IMGT-mapped/$sample\.IMGT-mapped_IGH.bowtie2.log\n";
+		system "bowtie2 -p $threads --no-unal -k 1 --local --al-gz IMGT-mapped/$sample\.IMGT-mapped_IGH.fastq.gz -x $imgt_IGH $input_reads > /dev/null 2> IMGT-mapped/$sample\.IMGT-mapped_IGH.bowtie2.log";
+		reconstructIg("IMGT-mapped/$sample\.IMGT-mapped_IGH.fastq.gz","IMGT-mapped");
+
+		print "bowtie2 -p $threads --no-unal -k 1 --local --al-gz IMGT-mapped/$sample\.IMGT-mapped_IGKL.fastq.gz -x $imgt_IGKL $input_reads > /dev/null 2> IMGT-mapped/$sample\.IMGT-mapped_IGKL.bowtie2.log\n";
+		system "bowtie2 -p $threads --no-unal -k 1 --local --al-gz IMGT-mapped/$sample\.IMGT-mapped_IGKL.fastq.gz -x $imgt_IGKL $input_reads > /dev/null 2> IMGT-mapped/$sample\.IMGT-mapped_IGKL.bowtie2.log";
+		reconstructIg("IMGT-mapped/$sample\.IMGT-mapped_IGKL.fastq.gz","IMGT-mapped");
+	}
+	else
+	{
+		my $input_reads = "-1 $read1_file_trimmed -2 $read2_file_trimmed";
+
+		print "bowtie2 -p $threads --no-unal -k 1 --local --al-conc-gz IMGT-mapped/$sample\_\%P.IMGT-mapped_IGH.fastq.gz -x $imgt_IGH $input_reads > /dev/null 2> IMGT-mapped/$sample\.IMGT-mapped_IGH.bowtie2.log\n";
+		system "bowtie2 -p $threads --no-unal -k 1 --local --al-conc-gz IMGT-mapped/$sample\_\%P.IMGT-mapped_IGH.fastq.gz -x $imgt_IGH $input_reads > /dev/null 2> IMGT-mapped/$sample\.IMGT-mapped_IGH.bowtie2.log";
+		reconstructIg("IMGT-mapped/$sample\_1P.IMGT-mapped_IGH.fastq.gz,IMGT-mapped/$sample\_2P.IMGT-mapped_IGH.fastq.gz","IMGT-mapped");
+
+		print "bowtie2 -p $threads --no-unal -k 1 --local --al-conc-gz IMGT-mapped/$sample\_\%P.IMGT-mapped_IGKL.fastq.gz -x $imgt_IGKL $input_reads > /dev/null 2> IMGT-mapped/$sample\.IMGT-mapped_IGKL.bowtie2.log\n";
+		system "bowtie2 -p $threads --no-unal -k 1 --local --al-conc-gz IMGT-mapped/$sample\_\%P.IMGT-mapped_IGKL.fastq.gz -x $imgt_IGKL $input_reads > /dev/null 2> IMGT-mapped/$sample\.IMGT-mapped_IGKL.bowtie2.log";
+		reconstructIg("IMGT-mapped/$sample\_1P.IMGT-mapped_IGKL.fastq.gz,IMGT-mapped/$sample\_2P.IMGT-mapped_IGKL.fastq.gz","IMGT-mapped");
+	}
+}
+
+#==========================================================================================================================
+# Recombinome
+#==========================================================================================================================
+
+if($method=~/Recombinome/)
+{
+	system "mkdir -p Recombinome-mapped";
+
+	my $recombinome_IGH = "$BALDR_path/resources/Recombinome/human/Recombined_IG_Heavy_N10";
+	my $recombinome_IGKL = "$BALDR_path/resources/Recombinome/human/Recombined_IG_Light";
+
+	if($single)
+	{
+		my $input_reads = "-U $read1_file_trimmed";
+
+		if(!(-e "Recombinome-mapped/$sample\.Recombinome-mapped_IGH.fastq.gz"))
+		{
+			print "bowtie2 -p $threads --no-unal -k 1 --np 0 --rdg 1,1 --rfg 1,1 --al-gz Recombinome-mapped/$sample\.Recombinome-mapped_IGH.fastq.gz -x $recombinome_IGH $input_reads > /dev/null 2> Recombinome-mapped/$sample\.Recombinome-mapped_IGH.bowtie2.log\n";
+			system "bowtie2 -p $threads --no-unal -k 1 --np 0 --rdg 1,1 --rfg 1,1 --al-gz Recombinome-mapped/$sample\.Recombinome-mapped_IGH.fastq.gz -x $recombinome_IGH $input_reads > /dev/null 2> Recombinome-mapped/$sample\.Recombinome-mapped_IGH.bowtie2.log";
+		}
+		
+		reconstructIg("Recombinome-mapped/$sample\.Recombinome-mapped_IGH.fastq.gz","Recombinome-mapped");
+
+		if(!(-e "Recombinome-mapped/$sample\.Recombinome-mapped_IGKL.fastq.gz"))
+		{
+			print "bowtie2 -p $threads --no-unal -k 1 --np 0 --rdg 1,1 --rfg 1,1 --al-gz Recombinome-mapped/$sample\.Recombinome-mapped_IGKL.fastq.gz -x $recombinome_IGKL $input_reads > /dev/null 2> Recombinome-mapped/$sample\.Recombinome-mapped_IGKL.bowtie2.log\n";
+			system "bowtie2 -p $threads --no-unal -k 1 --np 0 --rdg 1,1 --rfg 1,1 --al-gz Recombinome-mapped/$sample\.Recombinome-mapped_IGKL.fastq.gz -x $recombinome_IGKL $input_reads > /dev/null 2> Recombinome-mapped/$sample\.Recombinome-mapped_IGKL.bowtie2.log";
+		}	
+		reconstructIg("Recombinome-mapped/$sample\.Recombinome-mapped_IGKL.fastq.gz","Recombinome-mapped");
+	}
+	else
+	{
+		my $input_reads = "-1 $read1_file_trimmed -2 $read2_file_trimmed";
+
+		if(!(-e "Recombinome-mapped/$sample\_1P.Recombinome-mapped_IGH.fastq.gz"))
+		{
+			print "bowtie2 -p $threads --no-unal -k 1 --np 0 --rdg 1,1 --rfg 1,1 --al-conc-gz Recombinome-mapped/$sample\_\%P.Recombinome-mapped_IGH.fastq.gz -x $recombinome_IGH $input_reads > /dev/null 2> Recombinome-mapped/$sample\.Recombinome-mapped_IGH.bowtie2.log\n";
+			system "bowtie2 -p $threads --no-unal -k 1 --np 0 --rdg 1,1 --rfg 1,1 --al-conc-gz Recombinome-mapped/$sample\_\%P.Recombinome-mapped_IGH.fastq.gz -x $recombinome_IGH $input_reads > /dev/null 2> Recombinome-mapped/$sample\.Recombinome-mapped_IGH.bowtie2.log";
+		}
+		reconstructIg("Recombinome-mapped/$sample\_1P.Recombinome-mapped_IGH.fastq.gz,Recombinome-mapped/$sample\_2P.Recombinome-mapped_IGH.fastq.gz","Recombinome-mapped");
+
+		if(!(-e "Recombinome-mapped/$sample\_1P.Recombinome-mapped_IGKL.fastq.gz"))
+		{
+			print "bowtie2 -p $threads --no-unal -k 1 --np 0 --rdg 1,1 --rfg 1,1 --al-conc-gz Recombinome-mapped/$sample\_\%P.Recombinome-mapped_IGKL.fastq.gz -x $recombinome_IGKL $input_reads > /dev/null 2> Recombinome-mapped/$sample\.Recombinome-mapped_IGKL.bowtie2.log\n";
+			system "bowtie2 -p $threads --no-unal -k 1 --np 0 --rdg 1,1 --rfg 1,1 --al-conc-gz Recombinome-mapped/$sample\_\%P.Recombinome-mapped_IGKL.fastq.gz -x $recombinome_IGKL $input_reads > /dev/null 2> Recombinome-mapped/$sample\.Recombinome-mapped_IGKL.bowtie2.log";
+		}
+		reconstructIg("Recombinome-mapped/$sample\_1P.Recombinome-mapped_IGKL.fastq.gz,Recombinome-mapped/$sample\_2P.Recombinome-mapped_IGKL.fastq.gz","Recombinome-mapped");
+	}
+}
+
+###########################################################################################################################
+# Sub routines 
+###########################################################################################################################
+
+
+# Main sub routine
+
+sub reconstructIg
+{
+	my ($readfiles,$out) = @_;
+	my $trinity_input;
+	my $bowtie2_input;
+
+	if($readfiles=~/(.*.fastq.gz)\,(.*.fastq.gz)/)
+	{
+		$trinity_input = "--left $1 --right $2";
+		$bowtie2_input = "-1 $1 -2 $2"; 
+	}
+	elsif($readfiles=~/(.*.fastq.gz)/)
+	{
+		$trinity_input = "--single $1";
+		$bowtie2_input = "-U $1"; 
+	}
+	else
+	{
+		die "Wrong file passed to reconstructIG\n";
+	}
+	
+	my $trinity_out = &run_trinity($trinity_input,$out);
+
+	run_igblast($trinity_out,$out);
+
+	$trinity_out=~/.*\/(.*)_trinity/;
+
+	my $file_name = $1;
+
+	run_quantification($file_name,$out,$bowtie2_input);
+
+	add_quantification($file_name,$out);
+
+	sort_models($file_name,$out);
+
+	if($out=~/IG/ || $out=~/Unfiltered/)
+	{
+		my $sorted_igh_file = "$file_name\.igblast_tabular.quant.sorted.IGH";
+		my $sorted_igkl_file = "$file_name\.igblast_tabular.quant.sorted.IGKL";
+		filter($sorted_igh_file,$out);
+		filter($sorted_igkl_file,$out);
+	}
+	elsif($out=~/Recombinome/ || $out=~/IMGT/)
+	{
+		$file_name=~/(.*)_(IG.*)/;
+		my $name = $1;
+		my $chain = $2;
+		my $sorted_file = "$name\.igblast_tabular.quant.sorted.$chain";
+		filter($sorted_file,$out);
+	}	
+}
+
+#==========================================================================================================================
+
+sub run_trinity
+{
+    my ($input_reads,$out) = @_;
+
+	system "mkdir -p $out/Trinity/Log"; 
+
+	# For IMGT and Recombinome, need to add chains to file names
+	my $chain="$out";
+	if($input_reads=~/IGH/) {$chain .= "_IGH";}
+	if($input_reads=~/IGKL/) {$chain .= "_IGKL";}
+
+	if(-e  "$out/Trinity/$sample\.$chain\_trinity.Trinity.fasta")
+	{
+		print strftime("%Y-%m-%d %H:%M:%S\tSkipping assembly. Trinity file found $out/Trinity/$sample\.$chain\_trinity.Trinity.fasta.\n", localtime(time));		
+	}
+	else
+	{
+		print strftime("%Y-%m-%d %H:%M:%S\tRunning Trinity assembly for $input_reads.\n", localtime(time));	
+		print "/usr/bin/time -v Trinity --seqType fq --full_cleanup --max_memory $memory $input_reads --CPU $threads --no_normalize_reads --output $out/Trinity/$sample\.$chain\_trinity &> $out/Trinity/Log/$sample\.$chain\_trinity_log\n";
+		system "/usr/bin/time -v Trinity --seqType fq --full_cleanup --max_memory $memory $input_reads --CPU $threads --no_normalize_reads --output $out/Trinity/$sample\.$chain\_trinity &> $out/Trinity/Log/$sample\.$chain\_trinity_log";
+		print strftime("%Y-%m-%d %H:%M:%S\tFinished Trinity assembly. Assembled reads written in $out/Trinity.\n", localtime(time));		
+	}
+	return "$out/Trinity/$sample\.$chain\_trinity.Trinity.fasta";
+}
+
+#==========================================================================================================================
+sub run_igblast
+{
+	my ($input_fasta,$out) = @_;	
+
+	$input_fasta=~/.*\/(.*)_trinity/;
+	my $outname = $1;
+
+	print "IgBLAST outname $outname\n";
+
+	system "mkdir -p $out/IgBLAST"; 
+
+	if(-e "$igblast_path/internal_data")
+	{
+		system "ln -sf $igblast_path\/internal_data .";
+	}
+	else
+	{
+		die "ERROR! Could not find the internal data folder in the igblast path specified.\n";
+	}
+
+	my ($germline_db_V,$germline_db_D, $germline_db_J, $auxiliary_data, $constant_db);
+
+	if($organism eq "human")
+	{
+		$germline_db_V = "$BALDR_path/resources/IgBLAST_DB/human/human_IG_V";
+		$germline_db_D = "$BALDR_path/resources/IgBLAST_DB/human/human_IG_D";
+		$germline_db_J = "$BALDR_path/resources/IgBLAST_DB/human/human_IG_J";
+		$constant_db = "$BALDR_path/resources/IgBLAST_DB/human/human_IG_C";
+		$auxiliary_data = "$igblast_path/optional_file/human_gl.aux";			
+	}
+	elsif($organism eq "rhesus_monkey")
+	{
+		$germline_db_V = "$BALDR_path/resources/IgBLAST_DB/rhesus_monkey/rhesus_IG_V";
+		$germline_db_D = "$BALDR_path/resources/IgBLAST_DB/rhesus_monkey/rhesus_IG_D";
+		$germline_db_J = "$BALDR_path/resources/IgBLAST_DB/rhesus_monkey/rhesus_IG_J";
+		$constant_db = "$BALDR_path/resources/IgBLAST_DB/rhesus_monkey/rhesus_IG_C";
+		$auxiliary_data = "$igblast_path/optional_file/rhesus_monkey_gl.aux";
+	}
+	
+	if(-e "$out/IgBLAST/$sample\.$out\.blastout")
+	{
+		print strftime("%Y-%m-%d %H:%M:%S\tSkipping IgBLAST. IgBLAST output file found $out/IgBLAST/$outname\.blastout\n", localtime(time));		
+	}
+	else
+	{
+		print "igblastn -germline_db_V $germline_db_V -germline_db_J $germline_db_J -germline_db_D $germline_db_D  -organism $organism -domain_system imgt -query $input_fasta -auxiliary_data $auxiliary_data  -show_translation -out $out/IgBLAST/$outname\.blastout -num_threads $threads -db $constant_db -evalue 0.001 -outfmt 7 -max_target_seqs 5 -max_hsps 1 &> $out/IgBLAST/$outname\.blastout.log\n";
+		system "igblastn -germline_db_V $germline_db_V -germline_db_J $germline_db_J -germline_db_D $germline_db_D  -organism $organism -domain_system imgt -query $input_fasta -auxiliary_data $auxiliary_data  -show_translation -out $out/IgBLAST/$outname\.blastout -num_threads $threads -db $constant_db -evalue 0.001 -outfmt 7 -max_target_seqs 5 -max_hsps 1 &> $out/IgBLAST/$outname\.blastout.log";	
+	}
+	
+	system "$BALDR_path/lib/parse_igblast.pl $out/IgBLAST/$outname\.blastout $input_fasta";
+	
+}
+
+#==========================================================================================================================
+
+sub run_quantification
+{
+	my ($file,$out,$input_reads) = @_;
+
+	my $index_full = "$out/Quantification/full/index/$file"; 
+
+	if(!(-e "$index_full\.1.bt2"))
+	{
+		print "bowtie2-build $out/Quantification/full/$file\.full.fa $index_full\n";
+		system "bowtie2-build $out/Quantification/full/$file\.full.fa $index_full";
+	}
+	
+	if(!(-e "$out/Quantification/full/counts/$file\_full_bt2_numreadsmapped"))
+	{
+		print "bowtie2 -p $threads --no-unal --no-hd --no-discordant --gbar 1000 --end-to-end -a -x $index_full $input_reads | cut -f 3 | sort | uniq -c | sort -nr 1> $out/Quantification/full/counts/$file\_full_bt2_numreadsmapped\n";
+		system "bowtie2 -p $threads --no-unal --no-hd --no-discordant --gbar 1000 --end-to-end -a -x $index_full $input_reads | cut -f 3 | sort | uniq -c | sort -nr 1> $out/Quantification/full/counts/$file\_full_bt2_numreadsmapped\n";
+	}	
+	
+	my $index_VDJ = "$out/Quantification/VDJ/index/$file"; 
+	
+	if(!(-e "$index_VDJ\.1.bt2"))
+	{
+		print "bowtie2-build $out/Quantification/VDJ/$file\.VDJ.fa $index_VDJ\n";
+		system "bowtie2-build $out/Quantification/VDJ/$file\.VDJ.fa $index_VDJ";
+	}
+	if(!(-e "$out/Quantification/VDJ/counts/$file\_VDJ_bt2_numreadsmapped"))
+	{
+		print "bowtie2 -p $threads --no-unal --no-hd --no-discordant --gbar 1000 --end-to-end -a -x $index_VDJ $input_reads | cut -f 3 | sort | uniq -c | sort -nr 1> $out/Quantification/VDJ/counts/$file\_VDJ_bt2_numreadsmapped\n";
+		system "bowtie2 -p $threads --no-unal --no-hd --no-discordant --gbar 1000 --end-to-end -a -x $index_VDJ $input_reads | cut -f 3 | sort | uniq -c | sort -nr 1> $out/Quantification/VDJ/counts/$file\_VDJ_bt2_numreadsmapped\n";
+	}	
+}
+
+#==========================================================================================================================
+
+sub add_quantification
+{
+	my ($file,$out) = @_;	
+	system "$BALDR_path/lib/add_quantification.pl $file $out";	
+}
+
+#==========================================================================================================================
+
+sub sort_models
+{
+	my ($file,$out) = @_;	
+
+	system "mkdir -p $out/IgBLAST_quant_sorted";
+
+	my $igbast_tabular_quant = "$out/IgBLAST_quant/$file\.igblast_tabular.quant";
+
+	if($out=~/IG/ || $out=~/Unfiltered/)
+	{
+		system "grep \"IGH\" $igbast_tabular_quant | sort -k5,5nr > $out/IgBLAST_quant_sorted/$file\.igblast_tabular.quant.sorted.IGH";
+		system "grep -P \"IG[K,L]\" $igbast_tabular_quant | sort -k5,5nr > $out/IgBLAST_quant_sorted/$file\.igblast_tabular.quant.sorted.IGKL";
+	}
+	elsif($file =~ /IGH/ && ($out=~/Recombinome/ || $out =~/IMGT/))
+	{
+		my $file_new = $file;
+		$file_new =~s/_IGH//; 
+		system "sort -k5,5nr $igbast_tabular_quant > $out/IgBLAST_quant_sorted/$file_new\.igblast_tabular.quant.sorted.IGH";
+	}
+	elsif($file =~ /IGKL/ && ($out=~/Recombinome/ || $out =~/IMGT/))
+	{
+		my $file_new = $file;
+		$file_new =~s/_IGKL//; 
+		system "sort -k5,5nr $igbast_tabular_quant > $out/IgBLAST_quant_sorted/$file_new\.igblast_tabular.quant.sorted.IGKL";
+	}
+}
+
+#==========================================================================================================================
+
+sub filter
+{
+	my ($file,$out) = @_;	
+	print "$file $out\n";
+	system "$BALDR_path/lib/filter.pl $file $out";
+}
+
+
+__END__
+
+=head1 NAME
+
+BALDR 
+
+=head1 SYNOPSIS
+
+BALDR <input files> <options>
+
+  --single,-s     fastq.gz file for single-end run (-s or -p required)
+  --paired,-p     fastq.gz files for paired-end run. File names must be separated by comma (e.g. --paired R1.fastq.gz,R2.fastq.gz) (-s or -p required)
+  --methods       One or more reconstruction methods. For multiple methods, separte only by comma
+  		  human: IG-mapped_Unmapped (default), Unfiltered, IG-mapped_only, IMGT-mapped, Recombinome-mapped 
+  		  rhesus_monkey: FilterNonIG (default), Unfiltered, IG-mapped_only, IG-mapped_Unmapped
+  --organism,-o   human (default) or rhesus_monkey
+  --trimmomatic   Path for trimmomatic.jar file (e.g. ~/Trimmomatic-0.36/trimmomatic-0.36.jar) (required)
+  --adapter,-a    Path for the Trimmomatic adapter file (e.g. ~/Trimmomatic-0.36/adapters/NexteraPE-PE.fa) (required)
+  --BALDR         Path for the BALDR directory (e.g. ~/BALDR) (required)
+  --igblast,-i    Path for the IgBLAST folder (e.g. ~/ncbi-igblast-1.6.1) (required)
+  --memory        Max memory for Trinity (default 32GB)
+  --threads,-t    number of threads for STAR/bowtie2/Trinity (default 1)
+  --version ,-V   Version
+  --help,-h       Print this help
+
+=cut
+
+
+#--outdir,-o     Path for output files (default current directory)
