@@ -43,7 +43,6 @@ BALDR <input files> <options>
                   If not specified, the genome index for GRCh38 (Ensembl release 86 used)
                   BALDR only support GRCh38 genome for human and Macam for rhesus.
   --BALDR         Path for the BALDR directory (e.g. ~/BALDR) (required)
-  --igblast,-i    Path for the IgBLAST folder (e.g. ~/ncbi-igblast-1.6.1) (required)
   --memory        Max memory for Trinity (default 32G)
   --threads,-t    number of threads for STAR/bowtie2/Trinity (default 1)
   --version ,-V   Version
