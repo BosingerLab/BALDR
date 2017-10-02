@@ -26,7 +26,6 @@ GetOptions(
   'trimmomatic=s' => \my $trimmomatic_jar,
   'adapters=s' => \my $adapter_file,
   'method=s' => \my $method, # comma separated human: IG-mapped_only, IG-mapped_Unmapped, IMGT-mapped, Recombinome-mapped, Unfiltered; rhesus_monkey: IG-mapped_only, IG-mapped_Unmapped, FilterNonIG, Unfiltered
-  'igblast=s' => \my $igblast_path,
   'organism=s' => \ (my $organism="human"),
   'BALDR=s' => \my $BALDR_path,
   'STAR_index=s' => \my $STAR_index,
@@ -77,12 +76,12 @@ if($single && $paired)
 	pod2usage(-message=>"\nERROR: Please enter either single or paired read files\n");
 }
 
-if($single && $single =~/((\S+)_R\d_001.fastq.gz)/)
+if($single && $single =~/(.*\/(\S+)_R\d_001.fastq.gz)/)
 {
 	$read1_file = $1;
 	$sample = $2;
 }
-elsif($paired && $paired=~/((.*?)_R\d_001.fastq.gz)\,(.*fastq.gz)/)
+elsif($paired && $paired=~/(.*\/(.*?)_R\d_001.fastq.gz)\,(.*fastq.gz)/)
 {
 	$read1_file = $1;
 	$read2_file = $3; 
@@ -97,9 +96,7 @@ else
 # Get requireed arguments
 pod2usage(-message=>"\nERROR: Please enter the path for the trimmomatic adapter file\n") unless $adapter_file;
 pod2usage(-message=>"\nERROR: Please enter the path for the trimmomatic jar file\n") unless $trimmomatic_jar;
-pod2usage(-message=>"\nERROR: Please enter the path for the IgBLAST folder\n") unless $igblast_path;
 pod2usage(-message=>"\nERROR: Please enter the path for the BALDR folder\n") unless $BALDR_path;
-pod2usage(-message=>"\nERROR: Please enter the organism - human or rhesus_monkey\n") unless $organism;
 
 
 
@@ -627,18 +624,8 @@ sub run_igblast
 	$input_fasta=~/.*\/(.*)_trinity/;
 	my $outname = $1;
 
-	print "IgBLAST outname $outname\n";
-
 	system "mkdir -p $out/IgBLAST"; 
-
-	if(-e "$igblast_path/internal_data")
-	{
-		system "ln -sf $igblast_path\/internal_data .";
-	}
-	else
-	{
-		die "ERROR! Could not find the internal data folder in the igblast path specified.\n";
-	}
+	system "ln -sf $BALDR_path/resources/IgBLAST_DB/internal_data .";
 
 	my ($germline_db_V,$germline_db_D, $germline_db_J, $auxiliary_data, $constant_db);
 
@@ -648,7 +635,7 @@ sub run_igblast
 		$germline_db_D = "$BALDR_path/resources/IgBLAST_DB/human/human_IG_D";
 		$germline_db_J = "$BALDR_path/resources/IgBLAST_DB/human/human_IG_J";
 		$constant_db = "$BALDR_path/resources/IgBLAST_DB/human/human_IG_C";
-		$auxiliary_data = "$igblast_path/optional_file/human_gl.aux";			
+		$auxiliary_data = "$BALDR_path/resources/IgBLAST_DB/optional_file/human_gl.aux";			
 	}
 	elsif($organism eq "rhesus_monkey")
 	{
@@ -656,7 +643,7 @@ sub run_igblast
 		$germline_db_D = "$BALDR_path/resources/IgBLAST_DB/rhesus_monkey/rhesus_IG_D";
 		$germline_db_J = "$BALDR_path/resources/IgBLAST_DB/rhesus_monkey/rhesus_IG_J";
 		$constant_db = "$BALDR_path/resources/IgBLAST_DB/rhesus_monkey/rhesus_IG_C";
-		$auxiliary_data = "$igblast_path/optional_file/rhesus_monkey_gl.aux";
+		$auxiliary_data = "$BALDR_path/resources/IgBLAST_DB/rhesus_monkey_gl.aux";
 	}
 	
 	if(-e "$out/IgBLAST/$sample\.$out\.blastout")
@@ -773,7 +760,6 @@ BALDR <input files> <options>
   --adapter,-a    Path for the Trimmomatic adapter file (e.g. ~/Trimmomatic-0.36/adapters/NexteraPE-PE.fa) (required)
   --STAR_index    Path for the STAR aligner genome index
   --BALDR         Path for the BALDR directory (e.g. ~/BALDR) (required)
-  --igblast,-i    Path for the IgBLAST folder (e.g. ~/ncbi-igblast-1.6.1) (required)
   --memory        Max memory for Trinity (default 32G)
   --threads,-t    number of threads for STAR/bowtie2/Trinity (default 1)
   --version ,-V   Version
