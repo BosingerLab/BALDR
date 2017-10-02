@@ -21,7 +21,7 @@ BALDR is based on the *de novo* assembly of RNA-Seq reads. It allows reconstruct
 8. Perl 5
 
 ## Installation
-Clone or download the BALDRv1.0 package. 
+Clone or download the BALDR package. 
 
 `chmod +x BALDR`
 
