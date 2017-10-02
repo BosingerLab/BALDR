@@ -41,7 +41,7 @@ BALDR <input files> <options>
   --adapter,-a    Path for the Trimmomatic adapter file (e.g. ~/Trimmomatic-0.36/adapters/NexteraPE-PE.fa) (required)
   --STAR_index    Path for the STAR genome index (optional). 
                   If not specified, the genome index for GRCh38 (Ensembl release 86 used)
-                  BALDR only support GRCh38 genome for human and Macam for rhesus.
+                  BALDR only supports GRCh38 genome for human and Macam for rhesus.
   --BALDR         Path for the BALDR directory (e.g. ~/BALDR) (required)
   --memory        Max memory for Trinity (default 32G)
   --threads,-t    number of threads for STAR/bowtie2/Trinity (default 1)
