@@ -17,7 +17,7 @@ BALDR is based on the *de novo* assembly of RNA-Seq reads. It allows reconstruct
 4. [STAR v2.5.2b](https://github.com/alexdobin/STAR)
 5. [samtools v1.3.1](http://www.htslib.org/download/)
 6. [IgBLAST v1.6.1](https://www.ncbi.nlm.nih.gov/igblast/faq.html#standalone)
-7. [seqtk](https://github.com/lh3/seqtk)
+7. [seqtk 1.2](https://github.com/lh3/seqtk)
 8. Perl 5
 
 ## Installation
