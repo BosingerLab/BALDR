@@ -22,8 +22,10 @@ BALDR is based on the *de novo* assembly of RNA-Seq reads. It allows reconstruct
 
 ## Installation
 Clone or download the BALDR package. 
-`cd BALDR`
-`chmod +x BALDR`
+```
+cd BALDR
+chmod +x BALDR
+```
 
 ## Command line usage
 ```
