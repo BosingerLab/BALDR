@@ -22,7 +22,7 @@ BALDR is based on the *de novo* assembly of RNA-Seq reads. It allows reconstruct
 
 ## Installation
 Clone or download the BALDR package. 
-
+`cd BALDR`
 `chmod +x BALDR`
 
 ## Command line usage
@@ -30,7 +30,7 @@ Clone or download the BALDR package.
 BALDR <input files> <options>
 
   --single        fastq.gz file for single-end run (--single or -paired required)
-  --paired        fastq.gz files for paired-end run. File names must be separated by comma 
+  --paired        fastq.gz files for paired-end run. File names must be separated by a comma only
                   (e.g. --paired R1.fastq.gz,R2.fastq.gz) (--single or -paired required)
   --methods       One or more reconstruction methods. For multiple methods, separte only by comma.
                   human: IG-mapped_Unmapped (default), Unfiltered, IG-mapped_only, IMGT-mapped, Recombinome-mapped 
@@ -40,8 +40,8 @@ BALDR <input files> <options>
   --trimmomatic   Path for trimmomatic.jar file (e.g. ~/Trimmomatic-0.36/trimmomatic-0.36.jar) (required)
   --adapter,-a    Path for the Trimmomatic adapter file (e.g. ~/Trimmomatic-0.36/adapters/NexteraPE-PE.fa) (required)
   --STAR_index    Path for the STAR genome index (optional). 
-                  If not specified, the genome index for GRCh38 (Ensembl release 86 used)
-                  BALDR only supports GRCh38 genome for human and Macam for rhesus.
+                  If not specified, the genome index for GRCh38 (Ensembl release 86) or MacaM v7 will be built the first time 
+                  BALDR is run and used. BALDR only supports GRCh38 genome for human and MacaM v7 for rhesus.
   --BALDR         Path for the BALDR directory (e.g. ~/BALDR) (required)
   --memory        Max memory for Trinity (default 32G)
   --threads,-t    number of threads for STAR/bowtie2/Trinity (default 1)
