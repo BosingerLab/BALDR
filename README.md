@@ -11,12 +11,12 @@ BALDR is based on the *de novo* assembly of RNA-Seq reads. It allows reconstruct
 6. FilterNonIG (rhesus)- Assemble reads after filtering those that match to non-Ig genes in the genome
 
 ## Pre-requisites
-1. [Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic)
-2. [Trinity](https://github.com/trinityrnaseq/trinityrnaseq/wiki) v2.3.2 or later
-3. [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
-4. [STAR](https://github.com/alexdobin/STAR)
-5. [samtools](http://www.htslib.org/download/)
-6. [IgBLAST](https://www.ncbi.nlm.nih.gov/igblast/faq.html#standalone)
+1. [Trimmomatic 0.32](http://www.usadellab.org/cms/?page=trimmomatic)
+2. [Trinity v2.3.2 or later](https://github.com/trinityrnaseq/trinityrnaseq/wiki) 
+3. [bowtie2 2.3.0](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
+4. [STAR v2.5.2b](https://github.com/alexdobin/STAR)
+5. [samtools v1.3.1](http://www.htslib.org/download/)
+6. [IgBLAST v1.6.1](https://www.ncbi.nlm.nih.gov/igblast/faq.html#standalone)
 7. [seqtk](https://github.com/lh3/seqtk)
 8. Perl 5
 
