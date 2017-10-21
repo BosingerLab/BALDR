@@ -12,7 +12,7 @@ BALDR is based on the *de novo* assembly of RNA-Seq reads. It allows reconstruct
 
 ## Pre-requisites
 1. [Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic)
-2. [Trinity](https://github.com/trinityrnaseq/trinityrnaseq/wiki)
+2. [Trinity](https://github.com/trinityrnaseq/trinityrnaseq/wiki) v2.3.2 or later
 3. [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
 4. [STAR](https://github.com/alexdobin/STAR)
 5. [samtools](http://www.htslib.org/download/)
@@ -38,7 +38,8 @@ BALDR <input files> <options>
                   (e.g. --methods Unfiltered,IG-mapped_Unmapped)
   --organism,-o   human (default) or rhesus_monkey
   --trimmomatic   Path for trimmomatic.jar file (e.g. ~/Trimmomatic-0.36/trimmomatic-0.36.jar) (required)
-  --adapter,-a    Path for the Trimmomatic adapter file (e.g. ~/Trimmomatic-0.36/adapters/NexteraPE-PE.fa) (required)
+  --adapter,-a    Path for the Trimmomatic adapter file (e.g. ~/Trimmomatic-0.36/adapters/NexteraPE-PE.fa) 
+                  (required)
   --STAR_index    Path for the STAR genome index (optional). 
                   If not specified, the genome index for GRCh38 (Ensembl release 86) or MacaM v7 will be built the
                   first time BALDR is run and used. 
