@@ -30,9 +30,9 @@ Clone or download the BALDR package.
 BALDR <input files> <options>
 
   --single        fastq.gz file for single-end run (--single or -paired required)
-  --paired        fastq.gz files for paired-end run. File names must be separated by a comma only
+  --paired        fastq.gz files for paired-end run. File names must be separated only by a comma
                   (e.g. --paired R1.fastq.gz,R2.fastq.gz) (--single or -paired required)
-  --methods       One or more reconstruction methods. For multiple methods, separte only by comma.
+  --methods       One or more reconstruction methods. For multiple methods, separate only by comma.
                   human: IG-mapped_Unmapped (default), Unfiltered, IG-mapped_only, IMGT-mapped, Recombinome-mapped 
                   rhesus_monkey: FilterNonIG (default), Unfiltered, IG-mapped_only, IG-mapped_Unmapped
                   (e.g. --methods Unfiltered,IG-mapped_Unmapped)
