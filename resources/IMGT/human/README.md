@@ -2,7 +2,7 @@ ___
 **Software material and data coming from IMGT server may be used for academic research only, provided that it is referred to IMGT®, and cited as "IMGT®, the international ImMunoGeneTics information system® http://www.imgt.org."** 
 ___
 
-The IMGT human sequences were downloaded from http://www.imgt.org/vquest/refseqh.html on March 30, 2017
+The IMGT human sequences were downloaded from http://www.imgt.org/vquest/refseqh.html on November 10, 2016
 
 Number of sequences:
 
