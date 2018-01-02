@@ -1,4 +1,4 @@
-* ___
+
 **Software material and data coming from IMGT server may be used for academic research only, provided that it is referred to IMGT®, and cited as "IMGT®, the international ImMunoGeneTics information system® http://www.imgt.org (founder and director: Marie-Paule Lefranc, Montpellier, France)."** 
 
 **References to cite: 
@@ -28,5 +28,3 @@ Constant gene artificially spliced exons sets
 * IGLC - 13
   
 The bowtie2 index was built using [bowtie2 version 2.2.9](https://github.com/BenLangmead/bowtie2/releases/tag/v2.2.9).
-  
-  
