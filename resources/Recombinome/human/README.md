@@ -1,5 +1,5 @@
 ___
-**Software material and data coming from IMGT server may be used for academic research only, provided that it is referred to IMGT®, and cited as "IMGT®, the international ImMunoGeneTics information system® http://www.imgt.org."** 
+**Software material and data coming from IMGT server may be used for academic research only, provided that it is referred to IMGT®, and cited as "IMGT®, the international ImMunoGeneTics information system® http://www.imgt.org". For any other use please contact Marie-Paule Lefranc Marie-Paule.Lefranc@igh.cnrs.fr. For information on IMGT® copyright, warranty disclaimer, liability, endorsement, please see http://www.imgt.org/about/warranty.php** 
 ___
 
 The IMGT human sequences were downloaded from http://www.imgt.org/vquest/refseqh.html on November 10, 2016.
