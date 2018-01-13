@@ -22,14 +22,14 @@ use Pod::Usage;
 GetOptions(
   'single=s' => \my $single,
   'paired=s' => \my $paired,
-  'threads=i' => \ (my $threads=1),
+  'threads=i' => \my $threads,
   'trimmomatic=s' => \my $trimmomatic_jar,
   'adapters=s' => \my $adapter_file,
   'method=s' => \my $method, # comma separated human: IG-mapped_only, IG-mapped_Unmapped, IMGT-mapped, Recombinome-mapped, Unfiltered; rhesus_monkey: IG-mapped_only, IG-mapped_Unmapped, FilterNonIG, Unfiltered
   'organism=s' => \ (my $organism="human"),
   'BALDR=s' => \my $BALDR_path,
   'STAR_index=s' => \my $STAR_index,
-  'memory' => \ (my $memory="32G"),
+  'memory' => \my $memory,
   'output' => \my $outdir,
   'version|V' => \ my $version,
   'help|?' => \my $help
@@ -50,6 +50,9 @@ if(!($method))
 	if($organism eq "human") {$method = "IG-mapped_Unmapped";}	
 	if($organism eq "rhesus_monkey") {$method = "FilterNonIG";}
 }
+
+if(!($memory)) {$memory = "32G";}
+if(!($threads)) {$threads = 1;}
 
 # Check organism and method
 
@@ -76,12 +79,12 @@ if($single && $paired)
 	pod2usage(-message=>"\nERROR: Please enter either single or paired read files\n");
 }
 
-if($single && $single =~/(.*\/(\S+)_R\d_001.fastq.gz)/)
+if($single && $single =~/(.*\/(.*).fastq.gz)/)
 {
 	$read1_file = $1;
 	$sample = $2;
 }
-elsif($paired && $paired=~/(.*\/(.*?)_R\d_001.fastq.gz)\,(.*fastq.gz)/)
+elsif($paired && $paired=~/(.*\/(.*?).fastq.gz)\,(.*fastq.gz)/)
 {
 	$read1_file = $1;
 	$read2_file = $3; 
