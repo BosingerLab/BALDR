@@ -156,7 +156,7 @@ if(!($STAR_index))
 {
 	if($organism eq "human" && $method=~/IG/ && !(-e "$BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaMv7/SA"))
 	{
-		print strftime("%Y-%m-%d %H:%M:%S\tBuilding rhesus_monkey genome index for STAR\n", localtime(time));	
+		print strftime("%Y-%m-%d %H:%M:%S\tBuilding human genome index for STAR\n", localtime(time));	
 
 	    if(!(glob "$BALDR_path/resources/STAR_genomes/human/Homo_sapiens.GRCh38.dna.primary_assembly.fa*"))
 	    {
