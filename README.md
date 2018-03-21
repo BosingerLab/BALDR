@@ -29,16 +29,16 @@ chmod +x BALDR
 
 ## Command line usage
 ```
-BALDR <input files> <options>
+./BALDR <input files> <options>
 
   --single        fastq.gz file for single-end run (--single or -paired required)
   --paired        fastq.gz files for paired-end run. File names must be separated only by a comma
                   (e.g. --paired R1.fastq.gz,R2.fastq.gz) (--single or -paired required)
-  --methods       One or more reconstruction methods. For multiple methods, separate only by comma.
+  --method        One or more reconstruction methods. For multiple methods, separate only by comma.
                   human: IG-mapped_Unmapped (default), Unfiltered, IG-mapped_only, IMGT-mapped, Recombinome-mapped 
                   rhesus_monkey: FilterNonIG (default), Unfiltered, IG-mapped_only, IG-mapped_Unmapped
                   (e.g. --methods Unfiltered,IG-mapped_Unmapped)
-  --organism,-o   human (default) or rhesus_monkey
+  --organism      human (default) or rhesus_monkey
   --trimmomatic   Path for trimmomatic.jar file (e.g. ~/Trimmomatic-0.36/trimmomatic-0.36.jar) (required)
   --adapter,-a    Path for the Trimmomatic adapter file (e.g. ~/Trimmomatic-0.36/adapters/NexteraPE-PE.fa) 
                   (required)
