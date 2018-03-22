@@ -758,6 +758,7 @@ Paired-end:
 ./BALDR --paired <R1.fastq.gz,R2.fastq.gz> <options>
 
 Options:
+
   --method       One or more reconstruction methods. For multiple methods, separte only by comma
   		 human: IG-mapped_Unmapped (default), Unfiltered, IG-mapped_only, IMGT-mapped, Recombinome-mapped 
   		 rhesus_monkey: FilterNonIG (default), Unfiltered, IG-mapped_only, IG-mapped_Unmapped
