@@ -29,28 +29,25 @@ chmod +x BALDR
 
 ## Command line usage
 ```
-./BALDR <input files> <options>
+Single-end:
+./BALDR --single <file.fastq.gz> <options>
 
-  --single        fastq.gz file for single-end run (--single or -paired required)
-  --paired        fastq.gz files for paired-end run. File names must be separated only by a comma
-                  (e.g. --paired R1.fastq.gz,R2.fastq.gz) (--single or -paired required)
-  --method        One or more reconstruction methods. For multiple methods, separate only by comma.
-                  human: IG-mapped_Unmapped (default), Unfiltered, IG-mapped_only, IMGT-mapped, Recombinome-mapped 
-                  rhesus_monkey: FilterNonIG (default), Unfiltered, IG-mapped_only, IG-mapped_Unmapped
-                  (e.g. --methods Unfiltered,IG-mapped_Unmapped)
-  --organism      human (default) or rhesus_monkey
-  --trimmomatic   Path for trimmomatic.jar file (e.g. ~/Trimmomatic-0.36/trimmomatic-0.36.jar) (required)
-  --adapter,-a    Path for the Trimmomatic adapter file (e.g. ~/Trimmomatic-0.36/adapters/NexteraPE-PE.fa) 
-                  (required)
-  --STAR_index    Path for the STAR genome index (optional). 
-                  If not specified, the genome index for GRCh38 (Ensembl release 86) or MacaM v7 will be built the
-                  first time BALDR is run and used. 
-                  BALDR presently only supports GRCh38 (human) and MacaM v7 (rhesus).
-  --BALDR         Path for the BALDR directory (e.g. ~/BALDR) (required)
-  --memory        Max memory for Trinity (default 32G)
-  --threads,-t    number of threads for STAR/bowtie2/Trinity (default 1)
-  --version ,-V   Version
-  --help,-h       Print this help
+Paired-end:
+./BALDR --paired <R1.fastq.gz,R2.fastq.gz> <options>
+
+Options:
+  --method       One or more reconstruction methods. For multiple methods, separte only by comma
+  	    	       human: IG-mapped_Unmapped (default), Unfiltered, IG-mapped_only, IMGT-mapped, Recombinome-mapped 
+  		           rhesus_monkey: FilterNonIG (default), Unfiltered, IG-mapped_only, IG-mapped_Unmapped
+  --organism     human (default) or rhesus_monkey
+  --trimmomatic  Path for trimmomatic.jar file (e.g. ~/Trimmomatic-0.36/trimmomatic-0.36.jar) (required)
+  --adapter      Path for the Trimmomatic adapter file (e.g. ~/Trimmomatic-0.36/adapters/NexteraPE-PE.fa) (required)
+  --STAR_index   Path for the STAR aligner genome index
+  --BALDR        Path for the BALDR directory (e.g. ~/BALDR) (required)
+  --memory       Max memory for Trinity (default 32G)
+  --threads      number of threads for STAR/bowtie2/Trinity (default 1)
+  --version      Version
+  --help         Print this help
 ```
 
 
