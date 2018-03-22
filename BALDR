@@ -29,9 +29,9 @@ GetOptions(
   'organism=s' => \ (my $organism="human"),
   'BALDR=s' => \my $BALDR_path,
   'STAR_index=s' => \my $STAR_index,
-  'memory' => \my $memory,
-  'output' => \my $outdir,
-  'version|V' => \ my $version,
+  'memory=s' => \my $memory,
+  'output=s' => \my $outdir,
+  'version|V=s' => \ my $version,
   'help|?' => \my $help
 
 ) or pod2usage(2); # die "Invalid options passed to $0\n";
