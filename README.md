@@ -12,7 +12,7 @@ BALDR is based on the *de novo* assembly of RNA-Seq reads. It allows reconstruct
 
 ## Pre-requisites
 1. [Trimmomatic 0.32](http://www.usadellab.org/cms/?page=trimmomatic)
-2. [Trinity v2.3.2 or later](https://github.com/trinityrnaseq/trinityrnaseq/wiki) 
+2. [Trinity v2.3.2](https://github.com/trinityrnaseq/trinityrnaseq/wiki) 
 3. [bowtie2 2.3.0](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
 4. [STAR v2.5.2b](https://github.com/alexdobin/STAR)
 5. [samtools v1.3.1](http://www.htslib.org/download/)
