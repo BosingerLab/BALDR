@@ -30,8 +30,8 @@ GetOptions(
   'BALDR=s' => \my $BALDR_path,
   'STAR_index=s' => \my $STAR_index,
   'memory=s' => \my $memory,
-  'output=s' => \my $outdir,
-  'version|V=s' => \ my $version,
+  'output' => \my $outdir,
+  'version|V' => \ my $version,
   'help|?' => \my $help
 
 ) or pod2usage(2); # die "Invalid options passed to $0\n";
