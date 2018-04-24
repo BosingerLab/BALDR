@@ -79,12 +79,12 @@ if($single && $paired)
 	pod2usage(-message=>"\nERROR: Please enter either single or paired read files\n");
 }
 
-if($single && $single =~/(.*\/(.*).fastq.gz)/)
+if($single && $single =~/(.*\/*(.*).fastq.gz)/)
 {
 	$read1_file = $1;
 	$sample = $2;
 }
-elsif($paired && $paired=~/(.*\/(.*?).fastq.gz)\,(.*fastq.gz)/)
+elsif($paired && $paired=~/(.*\/*(.*?).fastq.gz)\,(.*fastq.gz)/)
 {
 	$read1_file = $1;
 	$read2_file = $3; 
