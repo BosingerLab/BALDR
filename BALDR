@@ -79,17 +79,18 @@ if($single && $paired)
 	pod2usage(-message=>"\nERROR: Please enter either single or paired read files\n");
 }
 
-if($single && $single =~/(.*\/*(.*).fastq.gz)/)
+if($single && ($single =~/(.*\/(.*).fastq.gz)/ || $single =~/((.*).fastq.gz)/) )
 {
-	$read1_file = $1;
-	$sample = $2;
+        $read1_file = $1;
+        $sample = $2;
 }
-elsif($paired && $paired=~/(.*\/*(.*?).fastq.gz)\,(.*fastq.gz)/)
+elsif($paired && ($paired=~/(.*\/(.*?).fastq.gz)\,(.*fastq.gz)/ || $paired=~/((.*?).fastq.gz)\,(.*fastq.gz)/) )
 {
-	$read1_file = $1;
-	$read2_file = $3; 
-	$sample = $2;
+        $read1_file = $1;
+        $read2_file = $3;
+        $sample = $2;
 }
+
 else
 {
 	pod2usage(-message=>"\nERROR: Missing input files. Please enter the compressed fastq.gz file/s. Please note the file names should end in \".fastq.gz\". For paired end, the files must be separated only by a comma.\n");
