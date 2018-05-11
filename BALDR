@@ -613,8 +613,8 @@ sub run_trinity
 	else
 	{
 		print strftime("%Y-%m-%d %H:%M:%S\tRunning Trinity assembly for $input_reads.\n", localtime(time));	
-		print "/usr/bin/time -v Trinity --seqType fq --full_cleanup --max_memory $memory $input_reads --CPU $threads --no_normalize_reads --output $out/Trinity/$sample\.$chain\_trinity &> $out/Trinity/Log/$sample\.$chain\_trinity_log\n";
-		system "/usr/bin/time -v Trinity --seqType fq --full_cleanup --max_memory $memory $input_reads --CPU $threads --no_normalize_reads --output $out/Trinity/$sample\.$chain\_trinity &> $out/Trinity/Log/$sample\.$chain\_trinity_log";
+		print "/usr/bin/time -v Trinity --seqType fq --full_cleanup --max_memory $memory $input_reads --CPU $threads --no_normalize_reads --output $out/Trinity/$sample\.$chain\_trinity > $out/Trinity/Log/$sample\.$chain\_trinity_log\n";
+		system "/usr/bin/time -v Trinity --seqType fq --full_cleanup --max_memory $memory $input_reads --CPU $threads --no_normalize_reads --output $out/Trinity/$sample\.$chain\_trinity > $out/Trinity/Log/$sample\.$chain\_trinity_log";
 		print strftime("%Y-%m-%d %H:%M:%S\tFinished Trinity assembly. Assembled reads written in $out/Trinity.\n", localtime(time));		
 	}
 	return "$out/Trinity/$sample\.$chain\_trinity.Trinity.fasta";
@@ -656,8 +656,8 @@ sub run_igblast
 	}
 	else
 	{
-		print "igblastn -germline_db_V $germline_db_V -germline_db_J $germline_db_J -germline_db_D $germline_db_D  -organism $organism -domain_system imgt -query $input_fasta -auxiliary_data $auxiliary_data  -show_translation -out $out/IgBLAST/$outname\.blastout -num_threads $threads -db $constant_db -evalue 0.001 -outfmt 7 -max_target_seqs 5 -max_hsps 1 &> $out/IgBLAST/$outname\.blastout.log\n";
-		system "igblastn -germline_db_V $germline_db_V -germline_db_J $germline_db_J -germline_db_D $germline_db_D  -organism $organism -domain_system imgt -query $input_fasta -auxiliary_data $auxiliary_data  -show_translation -out $out/IgBLAST/$outname\.blastout -num_threads $threads -db $constant_db -evalue 0.001 -outfmt 7 -max_target_seqs 5 -max_hsps 1 &> $out/IgBLAST/$outname\.blastout.log";	
+		print "igblastn -germline_db_V $germline_db_V -germline_db_J $germline_db_J -germline_db_D $germline_db_D  -organism $organism -domain_system imgt -query $input_fasta -auxiliary_data $auxiliary_data  -show_translation -out $out/IgBLAST/$outname\.blastout -num_threads $threads -db $constant_db -evalue 0.001 -outfmt 7 -max_target_seqs 5 -max_hsps 1 > $out/IgBLAST/$outname\.blastout.log\n";
+		system "igblastn -germline_db_V $germline_db_V -germline_db_J $germline_db_J -germline_db_D $germline_db_D  -organism $organism -domain_system imgt -query $input_fasta -auxiliary_data $auxiliary_data  -show_translation -out $out/IgBLAST/$outname\.blastout -num_threads $threads -db $constant_db -evalue 0.001 -outfmt 7 -max_target_seqs 5 -max_hsps 1 > $out/IgBLAST/$outname\.blastout.log";	
 	}
 	
 	system "$BALDR_path/lib/parse_igblast.pl $out/IgBLAST/$outname\.blastout $input_fasta";
