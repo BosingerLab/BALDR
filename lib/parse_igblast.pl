@@ -51,7 +51,7 @@ open OUT,">$igblast_results_path/tabular/$sample\.igblast_tabular" or die $!;
 open OUT1,">$outfile_path/Quantification/VDJ/$sample\.VDJ.fa" or die $!;
 open OUT2,">$outfile_path/Quantification/full/$sample\.full.fa" or die $!;
 
-$/="# IGBLASTN 2.5.1+";
+$/="# IGBLASTN";
 my @results = <IN>;
 $/="\n";
 close IN;
