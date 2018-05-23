@@ -24,6 +24,7 @@ GetOptions(
   'paired=s' => \my $paired,
   'threads=i' => \my $threads,
   'trimmomatic=s' => \my $trimmomatic_jar,
+  'trinity=s' => \my $trinity,
   'adapters=s' => \my $adapter_file,
   'method=s' => \my $method, # comma separated human: IG-mapped_only, IG-mapped_Unmapped, IMGT-mapped, Recombinome-mapped, Unfiltered; rhesus_monkey: IG-mapped_only, IG-mapped_Unmapped, FilterNonIG, Unfiltered
   'organism=s' => \ (my $organism="human"),
@@ -100,6 +101,7 @@ else
 # Get requireed arguments
 pod2usage(-message=>"\nERROR: Please enter the path for the trimmomatic adapter file\n") unless $adapter_file;
 pod2usage(-message=>"\nERROR: Please enter the path for the trimmomatic jar file\n") unless $trimmomatic_jar;
+pod2usage(-message=>"\nERROR: Please enter the path for Trinity \n") unless $trinity;
 pod2usage(-message=>"\nERROR: Please enter the path for the BALDR folder\n") unless $BALDR_path;
 
 
@@ -613,8 +615,8 @@ sub run_trinity
 	else
 	{
 		print strftime("%Y-%m-%d %H:%M:%S\tRunning Trinity assembly for $input_reads.\n", localtime(time));	
-		print "/usr/bin/time -v Trinity --seqType fq --full_cleanup --max_memory $memory $input_reads --CPU $threads --no_normalize_reads --output $out/Trinity/$sample\.$chain\_trinity > $out/Trinity/Log/$sample\.$chain\_trinity_log\n";
-		system "/usr/bin/time -v Trinity --seqType fq --full_cleanup --max_memory $memory $input_reads --CPU $threads --no_normalize_reads --output $out/Trinity/$sample\.$chain\_trinity > $out/Trinity/Log/$sample\.$chain\_trinity_log";
+		print "/usr/bin/time -v $trinity --seqType fq --full_cleanup --max_memory $memory $input_reads --CPU $threads --no_normalize_reads --output $out/Trinity/$sample\.$chain\_trinity > $out/Trinity/Log/$sample\.$chain\_trinity_log\n";
+		system "/usr/bin/time -v $trinity --seqType fq --full_cleanup --max_memory $memory $input_reads --CPU $threads --no_normalize_reads --output $out/Trinity/$sample\.$chain\_trinity > $out/Trinity/Log/$sample\.$chain\_trinity_log";
 		print strftime("%Y-%m-%d %H:%M:%S\tFinished Trinity assembly. Assembled reads written in $out/Trinity.\n", localtime(time));		
 	}
 	return "$out/Trinity/$sample\.$chain\_trinity.Trinity.fasta";
@@ -765,6 +767,7 @@ Options:
   		 rhesus_monkey: FilterNonIG (default), Unfiltered, IG-mapped_only, IG-mapped_Unmapped
   --organism     human (default) or rhesus_monkey
   --trimmomatic  Path for trimmomatic.jar file (e.g. ~/Trimmomatic-0.36/trimmomatic-0.36.jar) (required)
+  --trinity      Path for Trinity (e.g. ~/trinityrnaseq-Trinity-v2.3.2/Trinity) (required)
   --adapter      Path for the Trimmomatic adapter file (e.g. ~/Trimmomatic-0.36/adapters/NexteraPE-PE.fa) (required)
   --STAR_index   Path for the STAR aligner genome index
   --BALDR        Path for the BALDR directory (e.g. ~/BALDR) (required)
