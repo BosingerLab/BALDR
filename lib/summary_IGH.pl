@@ -9,9 +9,7 @@ print OUT "SampleID\tChain\tMethod\tRank\tQuery\tError\tVariable coords\tModel l
 my $old="";
 foreach my $f(@files)
 {
-  # 45_S283_L007_nexteratrim-Denovo-NoNorm_trinity.Trinity.blastout.edited.sorted.IGH.all.filtered
-  
-   my $method = "";
+  my $method = "";
   if($f=~/IG_Unmapped/){$method = "IG_Unmapped";}
   elsif($f=~/FilterNonIG/){$method = "FilterNonIG";}
   elsif($f=~/IG_/){$method = "IG";}
