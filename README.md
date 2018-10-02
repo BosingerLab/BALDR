@@ -20,7 +20,8 @@ BALDR is based on the *de novo* assembly of RNA-Seq reads. It allows reconstruct
 7. [seqtk 1.2](https://github.com/lh3/seqtk)
 8. Perl 5
 
-## Installation
+## Installation (manual)
+Install all the pre-requisites
 Clone or download the BALDR package. 
 ```
 cd BALDR
