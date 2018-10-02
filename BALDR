@@ -658,8 +658,8 @@ sub run_igblast
 	}
 	else
 	{
-		print "igblastn -germline_db_V $germline_db_V -germline_db_J $germline_db_J -germline_db_D $germline_db_D  -organism $organism -domain_system imgt -query $input_fasta -auxiliary_data $auxiliary_data  -show_translation -out $out/IgBLAST/$outname\.blastout -num_threads $threads -db $constant_db -evalue 0.001 -outfmt 7 -max_target_seqs 5 -max_hsps 1 > $out/IgBLAST/$outname\.blastout.log\n";
-		system "igblastn -germline_db_V $germline_db_V -germline_db_J $germline_db_J -germline_db_D $germline_db_D  -organism $organism -domain_system imgt -query $input_fasta -auxiliary_data $auxiliary_data  -show_translation -out $out/IgBLAST/$outname\.blastout -num_threads $threads -db $constant_db -evalue 0.001 -outfmt 7 -max_target_seqs 5 -max_hsps 1 > $out/IgBLAST/$outname\.blastout.log";	
+		print "igblastn -germline_db_V $germline_db_V -germline_db_J $germline_db_J -germline_db_D $germline_db_D  -organism $organism -domain_system imgt -query $input_fasta -auxiliary_data $auxiliary_data  -show_translation -out $out/IgBLAST/$outname\.blastout -num_threads $threads -db $constant_db -evalue 0.001 -outfmt 7 > $out/IgBLAST/$outname\.blastout.log\n";
+		system "igblastn -germline_db_V $germline_db_V -germline_db_J $germline_db_J -germline_db_D $germline_db_D  -organism $organism -domain_system imgt -query $input_fasta -auxiliary_data $auxiliary_data  -show_translation -out $out/IgBLAST/$outname\.blastout -num_threads $threads -db $constant_db -evalue 0.001 -outfmt 7 > $out/IgBLAST/$outname\.blastout.log";	
 	}
 	
 	system "$BALDR_path/lib/parse_igblast.pl $out/IgBLAST/$outname\.blastout $input_fasta";
