@@ -29,6 +29,7 @@ GetOptions(
   'method=s' => \my $method, # comma separated human: IG-mapped_only, IG-mapped_Unmapped, IMGT-mapped, Recombinome-mapped, Unfiltered; rhesus_monkey: IG-mapped_only, IG-mapped_Unmapped, FilterNonIG, Unfiltered
   'organism=s' => \ (my $organism="human"),
   'BALDR=s' => \my $BALDR_path,
+  'STAR=s' => \my $STAR,
   'STAR_index=s' => \my $STAR_index,
   'memory=s' => \my $memory,
   'output' => \my $outdir,
@@ -176,8 +177,8 @@ if(!($STAR_index))
 		}
 		
 		print strftime("%Y-%m-%d %H:%M:%S\tRunning STAR to build index\n", localtime(time));	
-		print "STAR --runThreadN $threads --runMode genomeGenerate --genomeDir $BALDR_path/resources/STAR_genomes/human/GRCh38_primary_ensembl86 --genomeFastaFiles $BALDR_path/resources/STAR_genomes/human/Homo_sapiens.GRCh38.dna.primary_assembly.fa --sjdbGTFfile $BALDR_path/resources/STAR_genomes/human/Homo_sapiens.GRCh38.86.gtf --sjdbOverhang 100\n";
-		system "STAR --runThreadN $threads --runMode genomeGenerate --genomeDir $BALDR_path/resources/STAR_genomes/human/GRCh38_primary_ensembl86 --genomeFastaFiles $BALDR_path/resources/STAR_genomes/human/Homo_sapiens.GRCh38.dna.primary_assembly.fa --sjdbGTFfile $BALDR_path/resources/STAR_genomes/human/Homo_sapiens.GRCh38.86.gtf --sjdbOverhang 100";
+		print "$STAR --runThreadN $threads --runMode genomeGenerate --genomeDir $BALDR_path/resources/STAR_genomes/human/GRCh38_primary_ensembl86 --genomeFastaFiles $BALDR_path/resources/STAR_genomes/human/Homo_sapiens.GRCh38.dna.primary_assembly.fa --sjdbGTFfile $BALDR_path/resources/STAR_genomes/human/Homo_sapiens.GRCh38.86.gtf --sjdbOverhang 100\n";
+		system "$STAR --runThreadN $threads --runMode genomeGenerate --genomeDir $BALDR_path/resources/STAR_genomes/human/GRCh38_primary_ensembl86 --genomeFastaFiles $BALDR_path/resources/STAR_genomes/human/Homo_sapiens.GRCh38.dna.primary_assembly.fa --sjdbGTFfile $BALDR_path/resources/STAR_genomes/human/Homo_sapiens.GRCh38.86.gtf --sjdbOverhang 100";
 	}
 	elsif($organism eq "rhesus_monkey" && $method=~/IG/ && !(-e "$BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaMv7/SA"))
 	{
@@ -197,8 +198,8 @@ if(!($STAR_index))
 		}
 		
 		print strftime("%Y-%m-%d %H:%M:%S\tRunning STAR to build index\n", localtime(time));	
-		print "STAR --runThreadN $threads --runMode genomeGenerate --genomeDir $BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaMv7 --genomeFastaFiles $BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaM_Rhesus_Genome_v7.fasta --sjdbGTFfile $BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaM_Rhesus_Genome_Annotation_v7.8.2.gtf --sjdbOverhang 100\n";
-		system "STAR --runThreadN $threads --runMode genomeGenerate --genomeDir $BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaMv7 --genomeFastaFiles $BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaM_Rhesus_Genome_v7.fasta --sjdbGTFfile $BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaM_Rhesus_Genome_Annotation_v7.8.2.gtf --sjdbOverhang 100";
+		print "$STAR --runThreadN $threads --runMode genomeGenerate --genomeDir $BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaMv7 --genomeFastaFiles $BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaM_Rhesus_Genome_v7.fasta --sjdbGTFfile $BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaM_Rhesus_Genome_Annotation_v7.8.2.gtf --sjdbOverhang 100\n";
+		system "$STAR --runThreadN $threads --runMode genomeGenerate --genomeDir $BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaMv7 --genomeFastaFiles $BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaM_Rhesus_Genome_v7.fasta --sjdbGTFfile $BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaM_Rhesus_Genome_Annotation_v7.8.2.gtf --sjdbOverhang 100";
 	}
 }
 
@@ -297,8 +298,8 @@ if($method =~/IG-mapped/ || $method=~/FilterNonIG/)
 
 		# Align to reference
 
-		print "STAR --genomeDir $genomeDir --genomeLoad LoadAndKeep --readFilesIn $input_reads --readFilesCommand zcat --runThreadN $threads --outStd BAM_SortedByCoordinate --outSAMtype BAM SortedByCoordinate --outSAMmode Full  --limitBAMsortRAM 20000000000 --outSAMattributes All --outSAMstrandField intronMotif --outSAMunmapped Within --outReadsUnmapped Fastx --quantMode GeneCounts --outFileNamePrefix STAR/$sample\.STAR. 1> STAR/$sample\.STAR.sorted.bam\n";
-		system "STAR --genomeDir $genomeDir --genomeLoad LoadAndKeep --readFilesIn $input_reads --readFilesCommand zcat --runThreadN $threads --outStd BAM_SortedByCoordinate --outSAMtype BAM SortedByCoordinate --outSAMmode Full  --limitBAMsortRAM 20000000000 --outSAMattributes All --outSAMstrandField intronMotif --outSAMunmapped Within --outReadsUnmapped Fastx --quantMode GeneCounts --outFileNamePrefix STAR/$sample\.STAR. 1> STAR/$sample\.STAR.sorted.bam";
+		print "$STAR --genomeDir $genomeDir --genomeLoad LoadAndKeep --readFilesIn $input_reads --readFilesCommand zcat --runThreadN $threads --outStd BAM_SortedByCoordinate --outSAMtype BAM SortedByCoordinate --outSAMmode Full  --limitBAMsortRAM 20000000000 --outSAMattributes All --outSAMstrandField intronMotif --outSAMunmapped Within --outReadsUnmapped Fastx --quantMode GeneCounts --outFileNamePrefix STAR/$sample\.STAR. 1> STAR/$sample\.STAR.sorted.bam\n";
+		system "$STAR --genomeDir $genomeDir --genomeLoad LoadAndKeep --readFilesIn $input_reads --readFilesCommand zcat --runThreadN $threads --outStd BAM_SortedByCoordinate --outSAMtype BAM SortedByCoordinate --outSAMmode Full  --limitBAMsortRAM 20000000000 --outSAMattributes All --outSAMstrandField intronMotif --outSAMunmapped Within --outReadsUnmapped Fastx --quantMode GeneCounts --outFileNamePrefix STAR/$sample\.STAR. 1> STAR/$sample\.STAR.sorted.bam";
 
 		print "samtools index STAR/$sample\.STAR.sorted.bam\n";
 		system "samtools index STAR/$sample\.STAR.sorted.bam";
@@ -766,9 +767,10 @@ Options:
   		 human: IG-mapped_Unmapped (default), Unfiltered, IG-mapped_only, IMGT-mapped, Recombinome-mapped 
   		 rhesus_monkey: FilterNonIG (default), Unfiltered, IG-mapped_only, IG-mapped_Unmapped
   --organism     human (default) or rhesus_monkey
-  --trimmomatic  Path for trimmomatic.jar file (e.g. ~/Trimmomatic-0.36/trimmomatic-0.36.jar) (required)
   --trinity      Path for Trinity (e.g. ~/trinityrnaseq-Trinity-v2.3.2/Trinity) (required)
   --adapter      Path for the Trimmomatic adapter file (e.g. ~/Trimmomatic-0.36/adapters/NexteraPE-PE.fa) (required)
+  --trimmomatic  Path for trimmomatic.jar file (e.g. ~/Trimmomatic-0.36/trimmomatic-0.36.jar) (required)
+  --STAR         Path for the STAR binary (required)
   --STAR_index   Path for the STAR aligner genome index
   --BALDR        Path for the BALDR directory (e.g. ~/BALDR) (required)
   --memory       Max memory for Trinity (default 32G)
