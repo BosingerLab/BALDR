@@ -42,6 +42,7 @@ Options:
   --organism     human (default) or rhesus_monkey
   --trimmomatic  Path for trimmomatic.jar file (e.g. ~/Trimmomatic-0.36/trimmomatic-0.36.jar) (required)
   --adapter      Path for the Trimmomatic adapter file (e.g. ~/Trimmomatic-0.36/adapters/NexteraPE-PE.fa) (required)
+  --trinity      Path for Trinity (e.g. ~/trinityrnaseq-Trinity-v2.3.2/Trinity) (required)
   --STAR_index   Path for the STAR aligner genome index
   --BALDR        Path for the BALDR directory (e.g. ~/BALDR) (required)
   --memory       Max memory for Trinity (default 32G)
