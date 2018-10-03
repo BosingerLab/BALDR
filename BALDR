@@ -299,8 +299,10 @@ if($method =~/IG-mapped/ || $method=~/FilterNonIG/)
 		# Align to reference
 
 		print "$STAR --genomeDir $genomeDir --genomeLoad LoadAndKeep --readFilesIn $input_reads --readFilesCommand zcat --runThreadN $threads --outStd BAM_SortedByCoordinate --outSAMtype BAM SortedByCoordinate --outSAMmode Full  --limitBAMsortRAM 20000000000 --outSAMattributes All --outSAMstrandField intronMotif --outSAMunmapped Within --outReadsUnmapped Fastx --quantMode GeneCounts --outFileNamePrefix STAR/$sample\.STAR. 1> STAR/$sample\.STAR.sorted.bam\n";
-		system "$STAR --genomeDir $genomeDir --genomeLoad LoadAndKeep --readFilesIn $input_reads --readFilesCommand zcat --runThreadN $threads --outStd BAM_SortedByCoordinate --outSAMtype BAM SortedByCoordinate --outSAMmode Full  --limitBAMsortRAM 20000000000 --outSAMattributes All --outSAMstrandField intronMotif --outSAMunmapped Within --outReadsUnmapped Fastx --quantMode GeneCounts --outFileNamePrefix STAR/$sample\.STAR. 1> STAR/$sample\.STAR.sorted.bam";
-
+		my $cmd_star = "$STAR --genomeDir $genomeDir --genomeLoad LoadAndKeep --readFilesIn $input_reads --runThreadN $threads --outStd BAM_SortedByCoordinate --outSAMtype BAM SortedByCoordinate --outSAMmode Full  --limitBAMsortRAM 20000000000 --outSAMattributes All --outSAMstrandField intronMotif --outSAMunmapped Within --outReadsUnmapped Fastx --quantMode GeneCounts --outFileNamePrefix STAR/$sample\.STAR. 1> STAR/$sample\.STAR.sorted.bam";
+		my @args = ("bash","-c","$cmd_star");
+		system(@args);
+		
 		print "samtools index STAR/$sample\.STAR.sorted.bam\n";
 		system "samtools index STAR/$sample\.STAR.sorted.bam";
 
