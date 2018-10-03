@@ -279,11 +279,11 @@ if($method =~/IG-mapped/ || $method=~/FilterNonIG/)
 	my $input_reads;
 	if($single) 
 	{
-		$input_reads = "$read1_file_trimmed";
+		$input_reads = "<(zcat $read1_file_trimmed)";
 	}
 	else 
 	{
-		$input_reads = "$read1_file_trimmed $read2_file_trimmed";
+		$input_reads = "<(zcat $read1_file_trimmed) <(zcat $read2_file_trimmed)";
 	} 
 	system "mkdir -p STAR";
 
@@ -298,7 +298,7 @@ if($method =~/IG-mapped/ || $method=~/FilterNonIG/)
 
 		# Align to reference
 
-		print "$STAR --genomeDir $genomeDir --genomeLoad LoadAndKeep --readFilesIn $input_reads --readFilesCommand zcat --runThreadN $threads --outStd BAM_SortedByCoordinate --outSAMtype BAM SortedByCoordinate --outSAMmode Full  --limitBAMsortRAM 20000000000 --outSAMattributes All --outSAMstrandField intronMotif --outSAMunmapped Within --outReadsUnmapped Fastx --quantMode GeneCounts --outFileNamePrefix STAR/$sample\.STAR. 1> STAR/$sample\.STAR.sorted.bam\n";
+		print "$STAR --genomeDir $genomeDir --genomeLoad LoadAndKeep --readFilesIn $input_reads --runThreadN $threads --outStd BAM_SortedByCoordinate --outSAMtype BAM SortedByCoordinate --outSAMmode Full  --limitBAMsortRAM 20000000000 --outSAMattributes All --outSAMstrandField intronMotif --outSAMunmapped Within --outReadsUnmapped Fastx --quantMode GeneCounts --outFileNamePrefix STAR/$sample\.STAR. 1> STAR/$sample\.STAR.sorted.bam\n";
 		my $cmd_star = "$STAR --genomeDir $genomeDir --genomeLoad LoadAndKeep --readFilesIn $input_reads --runThreadN $threads --outStd BAM_SortedByCoordinate --outSAMtype BAM SortedByCoordinate --outSAMmode Full  --limitBAMsortRAM 20000000000 --outSAMattributes All --outSAMstrandField intronMotif --outSAMunmapped Within --outReadsUnmapped Fastx --quantMode GeneCounts --outFileNamePrefix STAR/$sample\.STAR. 1> STAR/$sample\.STAR.sorted.bam";
 		my @args = ("bash","-c","$cmd_star");
 		system(@args);
@@ -618,8 +618,8 @@ sub run_trinity
 	else
 	{
 		print strftime("%Y-%m-%d %H:%M:%S\tRunning Trinity assembly for $input_reads.\n", localtime(time));	
-		print "/usr/bin/time -v $trinity --seqType fq --full_cleanup --max_memory $memory $input_reads --CPU $threads --no_normalize_reads --output $out/Trinity/$sample\.$chain\_trinity > $out/Trinity/Log/$sample\.$chain\_trinity_log\n";
-		system "/usr/bin/time -v $trinity --seqType fq --full_cleanup --max_memory $memory $input_reads --CPU $threads --no_normalize_reads --output $out/Trinity/$sample\.$chain\_trinity > $out/Trinity/Log/$sample\.$chain\_trinity_log";
+		print "$trinity --seqType fq --full_cleanup --max_memory $memory $input_reads --CPU $threads --no_normalize_reads --output $out/Trinity/$sample\.$chain\_trinity > $out/Trinity/Log/$sample\.$chain\_trinity_log\n";
+		system "$trinity --seqType fq --full_cleanup --max_memory $memory $input_reads --CPU $threads --no_normalize_reads --output $out/Trinity/$sample\.$chain\_trinity > $out/Trinity/Log/$sample\.$chain\_trinity_log";
 		print strftime("%Y-%m-%d %H:%M:%S\tFinished Trinity assembly. Assembled reads written in $out/Trinity.\n", localtime(time));		
 	}
 	return "$out/Trinity/$sample\.$chain\_trinity.Trinity.fasta";
