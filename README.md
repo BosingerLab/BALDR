@@ -26,16 +26,16 @@ Install all the pre-requisites
 Clone or download the BALDR package. 
 ```
 cd BALDR
-chmod +x BALDR
+chmod +x baldr
 ```
 
 ## Command line usage
 ```
 Single-end:
-./BALDR --single <file.fastq.gz> <options>
+./baldr --single <file.fastq.gz> <options>
 
 Paired-end:
-./BALDR --paired <R1.fastq.gz,R2.fastq.gz> <options>
+./baldr --paired <R1.fastq.gz,R2.fastq.gz> <options>
 
 Options:
   --method       One or more reconstruction methods. For multiple methods, separte only by comma
