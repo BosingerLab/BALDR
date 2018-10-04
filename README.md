@@ -66,7 +66,7 @@ Rhesus macaque
 mkdir -p STAR_MacaM/STAR_MacaM_index
 cd STAR_MacaM
 wget https://www.unmc.edu/rhesusgenechip/MacaM_Rhesus_Genome_v7.fasta.bz2
-bunzip2 $BALDR_path/resources/STAR_genomes/rhesus_monkey/MacaM_Rhesus_Genome_v7.fasta.bz2
+bunzip2 MacaM_Rhesus_Genome_v7.fasta.bz2
 wget https://www.unmc.edu/rhesusgenechip/RhesusGenomeUpload/MacaM_Rhesus_Genome_Annotation_v7.8.2.gtf
 STAR --runThreadN 16 --runMode genomeGenerate --genomeDir STAR_MacaM_index --genomeFastaFiles MacaM_Rhesus_Genome_v7.fasta --sjdbGTFfile MacaM_Rhesus_Genome_Annotation_v7.8.2.gtf --sjdbOverhang 100
 ```
@@ -117,11 +117,168 @@ Options:
 ## Output directories
 
 The output is written in the working directory. The following folders are created:
-
-
+  * **Trimmed** - contains trimmed reads output by Trimmomatic
+  * **STAR** - contains output of STAR aligner
+  * **IG-mapped_Unmapped/FilterNonIG/Unfiltered/IG-mapped/Recombinome-mapped/IMGT-mapped** - Folder created based on number of methods used
+Each of the above folder contains:
+    1. **Trinity**                       - output of Trinity assembly
+    2. **IgBLAST**                       - output of IgBLAST
+    3. **IgBLAST/tabular**               - (ii) parsed into a tabular format
+    4. **IgBLAST_quant**                 - (iii) + number of reads mapped to the complete sequence and VDJ sequence
+    5. **IgBLAST_quant_sorted**          - (iv) sorted by number of reads mapped to the complete sequence
+    6. **IgBLAST_quant_sorted_filtered** - (v) filtered to retain only producive sequences and remove redundant models. 
+                                            The final results are saved in this folder.       
 
 ## Aggregate results for all cells
-... in progress
+
+The summary_IGH.pl and summary_IGKL.pl scripts in BALDR/lib can be used to aggregate results for all the cells. 
+```
+./summary_IGH.pl <path/to/IgBLAST_quant_sorted_filtered>
+./summary_IGKL.pl <path/to/IgBLAST_quant_sorted_filtered>
+```
+This will generate a tab separated file with all filtered models for all cells. 
+
+The columns of the Results_IGH_rank_all.txt file are as follows:
+
+|Column number|Column|Description|
+|--|:----|:------|
+|1 |SampleID|Cell/Sample file name|
+|2 |Chain|Heavy|
+|3 |Method|Method used |
+|4 |Rank|Rank sorted by # reads mapped|
+|5 |Query|Transcript ID|
+|6 |Error|Rare cases of misassembly where both IGH and IGL genes predicted|
+|7 |Variable coords|V start to C start/V start to J end (if no C hit)|
+|8 |Model length|Length of complete chain|
+|9 |Bowtie2 count|Number of reads mapping to complete sequence|
+|10|VDJ length|Length of VDJ region|
+|11|VDJ Bowtie2 count|Number of reads mapping to VDJ sequence|
+|12|V subject id|blast results for top V hit|
+|13|V % identity||
+|14|V alignment length||
+|15|V mismatches||
+|16|V gap opens||
+|17|V gaps||
+|18|V q. start||
+|19|V q. end||
+|20|V s. start||
+|21|V s. end||
+|22|V evalue||
+|23|V bit score||
+|24|J subject id|blast results for top J hit|
+|25|J % identity||
+|26|J alignment length||
+|27|J mismatches||
+|28|J gap opens||
+|29|J gaps||
+|30|J q. start||
+|31|J q. end||
+|32|J s. start||
+|33|J s. end||
+|34|J evalue||
+|35|J bit score||
+|36|C subject id|blast results for top C hit|
+|37|C % identity||
+|38|C alignment length||
+|39|C mismatches||
+|40|C gap opens||
+|41|C gaps||
+|42|C q. start||
+|43|C q. end||
+|44|C s. start||
+|45|C s. end||
+|46|C evalue||
+|47|C bit score||
+|48|Top V gene match|IgBLAST results|
+|49|Top D gene match||
+|50|Top J gene match||
+|51|Chain type||
+|52|stop codon||
+|53|V-J frame||
+|54|Productive||
+|55|Strand||
+|56|V end||
+|57|V-D junction||
+|58|D region||
+|59|D-J junction||
+|60|J start||
+|61|CDR3||
+|62|CDR3_nucleotide||
+|63|CDR3_aminoacid||
+|64|Orientation||
+|65|Sequence||
+|66|Sequence(+)|Sequence in the + orientation|
+|67|VDJ sequence|VDJ sequence in the + orientation|
+
+The columns of the Results_IGKL_rank_all.txt file are as follows:
+|Column number|Column|Description|
+|--|:----|:------|
+
+|	1	|	Sample	|	Cell/Sample file name	|
+|	2	|	Chain	|	Light	|
+|	3	|	Method	|	Method used 	|
+|	4	|	Rank	|	Rank sorted by # reads mapped	|
+|	5	|	Query	|	Transcript ID	|
+|	6	|	Error	|	Rare cases of misassembly where both IGH and IGL genes predicted	|
+|	7	|	Variable coords	|	V start to C start/V start to J end (if no C hit)	|
+|	8	|	Model length	|	Length of complete chain	|
+|	9	|	Bowtie2 count	|	Number of reads mapping to complete sequence	|
+|	10	|	VJ length	|	Length of VJ region	|
+|	11	|	VJ Bowtie2 count	|	Number of reads mapping to VJ sequence	|
+|	12	|	V subject id	|	blast results for top V hit	|
+|	13	|	V % identity	|		|
+|	14	|	V alignment length	|		|
+|	15	|	V mismatches	|		|
+|	16	|	V gap opens	|		|
+|	17	|	V gaps	|		|
+|	18	|	V q. start	|		|
+|	19	|	V q. end	|		|
+|	20	|	V s. start	|		|
+|	21	|	V s. end	|		|
+|	22	|	V evalue	|		|
+|	23	|	V bit score	|		|
+|	24	|	J subject id	|	blast results for top J hit	|
+|	25	|	J % identity	|		|
+|	26	|	J alignment length	|		|
+|	27	|	J mismatches	|		|
+|	28	|	J gap opens	|		|
+|	29	|	J gaps	|		|
+|	30	|	J q. start	|		|
+|	31	|	J q. end	|		|
+|	32	|	J s. start	|		|
+|	33	|	J s. end	|		|
+|	34	|	J evalue	|		|
+|	35	|	J bit score	|		|
+|	36	|	C subject id	|	blast results for top C hit	|
+|	37	|	C %identity	|		|
+|	38	|	C alignment length	|		|
+|	39	|	C mismatches	|		|
+|	40	|	C gap opens	|		|
+|	41	|	C gaps	|		|
+|	42	|	C q. start	|		|
+|	43	|	C q. end	|		|
+|	44	|	C s. start	|		|
+|	45	|	C s. end	|		|
+|	46	|	C evalue	|		|
+|	47	|	C bit score	|		|
+|	48	|	Top V gene match	|	IgBLAST results	|
+|	49	|	Top J gene match	|		|
+|	50	|	Chain type	|		|
+|	51	|	stop codon	|		|
+|	52	|	V-J frame	|		|
+|	53	|	Productive	|		|
+|	54	|	Strand	|		|
+|	55	|	V end	|		|
+|	56	|	V-J junction	|		|
+|	57	|	J start	|		|
+|	58	|	CDR3	|		|
+|	59	|	CDR3_nucleotide	|		|
+|	60	|	CDR3_aminoacid	|		|
+|	61	|	Orientation	|		|
+|	62	|	Sequence	|		|
+|	63	|	Sequence(+)	|	Sequence in the + orientation	|
+|	64	|	VJ sequence	|	VDJ sequence in the + orientation	|
+
 
 ## Clonal assignment
 ... in progress
