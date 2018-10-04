@@ -130,7 +130,7 @@ Each of the above folder contains:
     3. **IgBLAST/tabular**               - (ii) parsed into a tabular format
     4. **IgBLAST_quant**                 - (iii) + number of reads mapped to the complete sequence and VDJ sequence
     5. **IgBLAST_quant_sorted**          - (iv) sorted by number of reads mapped to the complete sequence
-    6. **IgBLAST_quant_sorted_filtered** - (v) filtered to retain only producive sequences and remove redundant models. 
+    6. **IgBLAST_quant_sorted_filtered** - (v) filtered to retain only productive sequences and remove redundant models. 
                                             The final results are saved in this folder.       
 
 ## Aggregate results for all cells
