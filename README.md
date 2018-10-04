@@ -108,10 +108,14 @@ Options:
   --help         Print this help
 ```
 
-## Running using the Docker image
+## Running BALDR using the Docker image
 
 ```
+# Single end
+docker run -v </path/to/STAR/index>:/genome -v </path/to/fastq/files>:/data -w /data bosingerlab/baldr /home/tools/BALDR-master/BALDR --single /data/<file1_R1_001.fastq.gz> --trimmomatic /home/tools/Trimmomatic-0.38/trimmomatic-0.38.jar --adapter /home/tools/Trimmomatic-0.38/adapters/NexteraPE-PE.fa --BALDR /home/tools/BALDR-master --trinity /home/tools/trinityrnaseq-Trinity-v2.3.2/Trinity --memory 32G --threads 16 --STAR /home/tools/STAR-2.6.0c/bin/Linux_x86_64/STAR --STAR_index /genome
 
+# Paired end
+docker run -v </path/to/STAR/index>:/genome -v </path/to/fastq/files>:/data -w /data bosingerlab/baldr /home/tools/BALDR-master/BALDR --paired /data/<file1_R1_001.fastq.gz>,/data/<file1_R2_001.fastq.gz> --trimmomatic /home/tools/Trimmomatic-0.38/trimmomatic-0.38.jar --adapter /home/tools/Trimmomatic-0.38/adapters/NexteraPE-PE.fa --BALDR /home/tools/BALDR-master --trinity /home/tools/trinityrnaseq-Trinity-v2.3.2/Trinity --memory 64G --threads 32 --STAR /home/tools/STAR-2.6.0c/bin/Linux_x86_64/STAR --STAR_index /genome
 ```
 
 ## Output directories
