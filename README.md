@@ -10,7 +10,9 @@ BALDR is based on the *de novo* assembly of RNA-Seq reads. It allows reconstruct
 5. Recombinome-mapped (human) - Assemble reads mapping to the Ig recombinome
 6. FilterNonIG (rhesus)- Assemble reads after filtering those that match to non-Ig genes in the genome
 
-## Pre-requisites
+## Installation (manual)
+
+### Pre-requisites
 1. [Trimmomatic 0.32](http://www.usadellab.org/cms/?page=trimmomatic)
 2. [Trinity v2.3.2](https://github.com/trinityrnaseq/trinityrnaseq/wiki) (Newer versions are not compatible)
 3. [bowtie2 2.3.0](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
@@ -20,7 +22,6 @@ BALDR is based on the *de novo* assembly of RNA-Seq reads. It allows reconstruct
 7. [seqtk 1.2](https://github.com/lh3/seqtk)
 8. Perl 5
 
-## Installation (manual)
 Install all the pre-requisites
 Clone or download the BALDR package. 
 ```
@@ -44,6 +45,7 @@ Options:
   --trimmomatic  Path for trimmomatic.jar file (e.g. ~/Trimmomatic-0.36/trimmomatic-0.36.jar) (required)
   --adapter      Path for the Trimmomatic adapter file (e.g. ~/Trimmomatic-0.36/adapters/NexteraPE-PE.fa) (required)
   --trinity      Path for Trinity (e.g. ~/trinityrnaseq-Trinity-v2.3.2/Trinity) (required)
+  --STAR         Path for the STAR binary (required)
   --STAR_index   Path for the STAR aligner genome index
   --BALDR        Path for the BALDR directory (e.g. ~/BALDR) (required)
   --memory       Max memory for Trinity (default 32G)
