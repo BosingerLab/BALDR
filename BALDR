@@ -651,7 +651,7 @@ sub run_igblast
 		$germline_db_V = "$BALDR_path/resources/IgBLAST_DB/internal_data/rhesus_monkey/rhesus_monkey_V";
 		$germline_db_D = "$BALDR_path/resources/IgBLAST_DB/internal_data/rhesus_monkey/rhesus_monkey_D";
 		$germline_db_J = "$BALDR_path/resources/IgBLAST_DB/internal_data/rhesus_monkey/rhesus_monkey_J";
-		$constant_db = "$BALDR_path/resources/IgBLAST_DB/rhesus_monkey/rhesus_monkey_C";
+		$constant_db = "$BALDR_path/resources/IgBLAST_DB/rhesus_monkey/rhesus_IG_C";
 		$auxiliary_data = "$BALDR_path/resources/IgBLAST_DB/optional_file/rhesus_monkey_gl.aux";
 	}
 	
