@@ -211,9 +211,9 @@ The columns of the Results_IGH_rank_all.txt file are as follows:
 |67|VDJ sequence|VDJ sequence in the + orientation|
 
 The columns of the Results_IGKL_rank_all.txt file are as follows:
+
 |Column number|Column|Description|
 |--|:----|:------|
-
 |	1	|	Sample	|	Cell/Sample file name	|
 |	2	|	Chain	|	Light	|
 |	3	|	Method	|	Method used 	|
@@ -277,7 +277,7 @@ The columns of the Results_IGKL_rank_all.txt file are as follows:
 |	61	|	Orientation	|		|
 |	62	|	Sequence	|		|
 |	63	|	Sequence(+)	|	Sequence in the + orientation	|
-|	64	|	VJ sequence	|	VDJ sequence in the + orientation	|
+|	64	|	VJ sequence	|	VJ sequence in the + orientation	|
 
 
 ## Clonal assignment
