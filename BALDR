@@ -25,6 +25,7 @@ GetOptions(
   'threads=i' => \my $threads,
   'trimmomatic=s' => \my $trimmomatic_jar,
   'trinity=s' => \my $trinity,
+  'igblastn=s' => \my $igblastn,
   'adapters=s' => \my $adapter_file,
   'method=s' => \my $method, # comma separated human: IG-mapped_only, IG-mapped_Unmapped, IMGT-mapped, Recombinome-mapped, Unfiltered; rhesus_monkey: IG-mapped_only, IG-mapped_Unmapped, FilterNonIG, Unfiltered
   'organism=s' => \ (my $organism="human"),
@@ -661,8 +662,8 @@ sub run_igblast
 	}
 	else
 	{
-		print "igblastn -germline_db_V $germline_db_V -germline_db_J $germline_db_J -germline_db_D $germline_db_D  -organism $organism -domain_system imgt -query $input_fasta -auxiliary_data $auxiliary_data  -show_translation -out $out/IgBLAST/$outname\.blastout -num_threads $threads -db $constant_db -evalue 0.001 -outfmt 7 > $out/IgBLAST/$outname\.blastout.log\n";
-		system "igblastn -germline_db_V $germline_db_V -germline_db_J $germline_db_J -germline_db_D $germline_db_D  -organism $organism -domain_system imgt -query $input_fasta -auxiliary_data $auxiliary_data  -show_translation -out $out/IgBLAST/$outname\.blastout -num_threads $threads -db $constant_db -evalue 0.001 -outfmt 7 > $out/IgBLAST/$outname\.blastout.log";	
+		print "$igblastn -germline_db_V $germline_db_V -germline_db_J $germline_db_J -germline_db_D $germline_db_D  -organism $organism -domain_system imgt -query $input_fasta -auxiliary_data $auxiliary_data  -show_translation -out $out/IgBLAST/$outname\.blastout -num_threads $threads -db $constant_db -evalue 0.001 -outfmt 7 > $out/IgBLAST/$outname\.blastout.log\n";
+		system "$igblastn -germline_db_V $germline_db_V -germline_db_J $germline_db_J -germline_db_D $germline_db_D  -organism $organism -domain_system imgt -query $input_fasta -auxiliary_data $auxiliary_data  -show_translation -out $out/IgBLAST/$outname\.blastout -num_threads $threads -db $constant_db -evalue 0.001 -outfmt 7 > $out/IgBLAST/$outname\.blastout.log";	
 	}
 	
 	system "$BALDR_path/lib/parse_igblast.pl $out/IgBLAST/$outname\.blastout $input_fasta";
@@ -772,6 +773,7 @@ Options:
   --trinity      Path for Trinity (e.g. ~/trinityrnaseq-Trinity-v2.3.2/Trinity) (required)
   --adapter      Path for the Trimmomatic adapter file (e.g. ~/Trimmomatic-0.36/adapters/NexteraPE-PE.fa) (required)
   --trimmomatic  Path for trimmomatic.jar file (e.g. ~/Trimmomatic-0.36/trimmomatic-0.36.jar) (required)
+  --igblastn     Path for igblastn (e.g. ~/ncbi-igblast-1.6.1/bin/igblastn) (required)
   --STAR         Path for the STAR binary (required)
   --STAR_index   Path for the STAR aligner genome index
   --BALDR        Path for the BALDR directory (e.g. ~/BALDR) (required)
