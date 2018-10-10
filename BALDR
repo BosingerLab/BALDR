@@ -330,8 +330,8 @@ if($method =~/IG-mapped/ || $method=~/FilterNonIG/)
 		 	print "seqtk subseq $read1_file_trimmed FilterNonIG/Filtered_reads/$sample\.remnonIG.listreads | gzip  > FilterNonIG/Filtered_fastq/$sample\_1P.FilterNonIG.fastq.gz\n";
 		 	system "seqtk subseq $read1_file_trimmed FilterNonIG/Filtered_reads/$sample\.remnonIG.listreads | gzip  > FilterNonIG/Filtered_fastq/$sample\_1P.FilterNonIG.fastq.gz";
 
-		  	print "seqtk subseq $read1_file_trimmed FilterNonIG/Filtered_reads/$sample\.remnonIG.listreads | gzip  > FilterNonIG/Filtered_fastq/$sample\_2P.FilterNonIG.fastq.gz\n";
-		 	system "seqtk subseq $read1_file_trimmed FilterNonIG/Filtered_reads/$sample\.remnonIG.listreads | gzip  > FilterNonIG/Filtered_fastq/$sample\_2P.FilterNonIG.fastq.gz";
+		  	print "seqtk subseq $read2_file_trimmed FilterNonIG/Filtered_reads/$sample\.remnonIG.listreads | gzip  > FilterNonIG/Filtered_fastq/$sample\_2P.FilterNonIG.fastq.gz\n";
+		 	system "seqtk subseq $read2_file_trimmed FilterNonIG/Filtered_reads/$sample\.remnonIG.listreads | gzip  > FilterNonIG/Filtered_fastq/$sample\_2P.FilterNonIG.fastq.gz";
 
 		 	reconstructIg("FilterNonIG/Filtered_fastq/$sample\_1P.FilterNonIG.fastq.gz,FilterNonIG/Filtered_fastq/$sample\_2P.FilterNonIG.fastq.gz","FilterNonIG");
 		}
