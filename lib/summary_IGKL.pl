@@ -8,10 +8,12 @@ print OUT "Sample\tChain\tMethod\tRank\tQuery\tError\tVariable coords\tModel len
 foreach my $f(@files)
 {
   my $method = "";
-  if($f=~/IG_Unmapped/){$method = "IG_Unmapped";}
+  if($f=~/IG-mapped_Unmapped/){$method = "IG_Unmapped";}
   elsif($f=~/FilterNonIG/){$method = "FilterNonIG";}
-  elsif($f=~/IG_/){$method = "IG";}
-  elsif($f=~/Trinity/){$method = "Denovo";}
+  elsif($f=~/Unfiltered/){$method = "Unfiltered";}
+  elsif($f=~/IG-mapped/){$method = "IG";}
+  elsif($f=~/Recombinome/){$method = "Recombinome";}
+  elsif($f=~/IMGT/){$method = "IMGT";}
 
   $f=~/.*?\/+(.*).igblast/;
   my $sample = $1;
