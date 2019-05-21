@@ -32,7 +32,7 @@ chmod +x BALDR
 
 You can pull the image from DockerHub
 ```
-docker pull bosingerlab/docker
+docker pull bosingerlab/baldr
 ```
 
 OR
