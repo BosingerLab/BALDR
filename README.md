@@ -92,16 +92,17 @@ Paired-end:
 ./BALDR --paired <R1.fastq.gz,R2.fastq.gz> <options>
 
 Options:
-  --trimmomatic  Path for trimmomatic.jar file (e.g. ~/Trimmomatic-0.36/trimmomatic-0.36.jar) (required)
-  --adapter      Path for the Trimmomatic adapter file (e.g. ~/Trimmomatic-0.36/adapters/NexteraPE-PE.fa) (required)
-  --trinity      Path for Trinity (e.g. ~/trinityrnaseq-Trinity-v2.3.2/Trinity) (required)
-  --STAR         Path for the STAR binary (required)
-  --BALDR        Path for the BALDR directory (e.g. ~/BALDR) (required)
-  --method       One or more reconstruction methods. For multiple methods, separate only by comma
-  	    	 human: IG-mapped_Unmapped (default)/Unfiltered/IG-mapped_only/IMGT-mapped/Recombinome-mapped 
-  		 rhesus_monkey: FilterNonIG (default)/IG-mapped_Unmapped/Unfiltered/IG-mapped_only
+  --method       One or more reconstruction methods. For multiple methods, separte only by comma
+  		 human: IG-mapped_Unmapped (default), Unfiltered, IG-mapped_only, IMGT-mapped, Recombinome-mapped 
+  		 rhesus_monkey: FilterNonIG (default), Unfiltered, IG-mapped_only, IG-mapped_Unmapped
   --organism     human (default) or rhesus_monkey
+  --trinity      Path for Trinity (e.g. ~/trinityrnaseq-Trinity-v2.3.2/Trinity) (required)
+  --adapter      Path for the Trimmomatic adapter file (e.g. ~/Trimmomatic-0.36/adapters/NexteraPE-PE.fa) (required)
+  --trimmomatic  Path for trimmomatic.jar file (e.g. ~/Trimmomatic-0.36/trimmomatic-0.36.jar) (required)
+  --igblastn     Path for igblastn (e.g. ~/ncbi-igblast-1.6.1/bin/igblastn) (required)
+  --STAR         Path for the STAR binary (required)
   --STAR_index   Path for the STAR aligner genome index
+  --BALDR        Path for the BALDR directory (e.g. ~/BALDR) (required)
   --memory       Max memory for Trinity (default 32G)
   --threads      number of threads for STAR/bowtie2/Trinity (default 1)
   --version      Version
