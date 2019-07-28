@@ -100,6 +100,10 @@ Options:
   --adapter      Path for the Trimmomatic adapter file (e.g. ~/Trimmomatic-0.36/adapters/NexteraPE-PE.fa) (required)
   --trimmomatic  Path for trimmomatic.jar file (e.g. ~/Trimmomatic-0.36/trimmomatic-0.36.jar) (required)
   --igblastn     Path for igblastn (e.g. ~/ncbi-igblast-1.6.1/bin/igblastn) (required)
+  --db           Path for custom IgBLAST database. The folder should contain the following files: 
+		 human_IG_V.*,human_IG_D.*,human_IG_J.*,human_IG_C.*,human_gl.aux OR
+		 rhesus_monkey_V.*,rhesus_monkey_D.*,rhesus_monkey_J.*,rhesus_monkey_C.*,rhesus_monkey_gl.aux
+		 If any file is not available, it can be copied from resources	 
   --STAR         Path for the STAR binary (required)
   --STAR_index   Path for the STAR aligner genome index
   --BALDR        Path for the BALDR directory (e.g. ~/BALDR) (required)
