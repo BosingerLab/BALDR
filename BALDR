@@ -26,6 +26,7 @@ GetOptions(
   'trimmomatic=s' => \my $trimmomatic_jar,
   'trinity=s' => \my $trinity,
   'igblastn=s' => \my $igblastn,
+  'db=s' => \my $db,
   'adapters=s' => \my $adapter_file,
   'method=s' => \my $method, # comma separated human: IG-mapped_only, IG-mapped_Unmapped, IMGT-mapped, Recombinome-mapped, Unfiltered; rhesus_monkey: IG-mapped_only, IG-mapped_Unmapped, FilterNonIG, Unfiltered
   'organism=s' => \ (my $organism="human"),
@@ -43,7 +44,7 @@ GetOptions(
 
  if($version)
  {
- 	print "BALDR v1.0\n";
+ 	print "BALDR v1.1\n";
  	exit;
  }
 
@@ -105,7 +106,8 @@ pod2usage(-message=>"\nERROR: Please enter the path for the trimmomatic adapter 
 pod2usage(-message=>"\nERROR: Please enter the path for the trimmomatic jar file\n") unless $trimmomatic_jar;
 pod2usage(-message=>"\nERROR: Please enter the path for Trinity \n") unless $trinity;
 pod2usage(-message=>"\nERROR: Please enter the path for the BALDR folder\n") unless $BALDR_path;
-
+pod2usage(-message=>"\nERROR: Please enter the path for the STAR binary\n") unless $STAR;
+pod2usage(-message=>"\nERROR: Please enter the path for the igblastn binary\n") unless $igblastn;
 
 
 ###########################################################################################################################
@@ -641,19 +643,41 @@ sub run_igblast
 
 	if($organism eq "human")
 	{
-		$germline_db_V = "$BALDR_path/resources/IgBLAST_DB/human/human_IG_V";
-		$germline_db_D = "$BALDR_path/resources/IgBLAST_DB/human/human_IG_D";
-		$germline_db_J = "$BALDR_path/resources/IgBLAST_DB/human/human_IG_J";
-		$constant_db = "$BALDR_path/resources/IgBLAST_DB/human/human_IG_C";
-		$auxiliary_data = "$BALDR_path/resources/IgBLAST_DB/optional_file/human_gl.aux";			
+		if(!$db)
+		{
+			$germline_db_V = "$BALDR_path/resources/IgBLAST_DB/human/human_IG_V";
+			$germline_db_D = "$BALDR_path/resources/IgBLAST_DB/human/human_IG_D";
+			$germline_db_J = "$BALDR_path/resources/IgBLAST_DB/human/human_IG_J";
+			$constant_db = "$BALDR_path/resources/IgBLAST_DB/human/human_IG_C";
+			$auxiliary_data = "$BALDR_path/resources/IgBLAST_DB/optional_file/human_gl.aux";			
+		}
+		else
+		{
+			$germline_db_V = "$db/human_IG_V";
+                        $germline_db_D = "$db/human_IG_D";
+                        $germline_db_J = "$db/human_IG_J";
+                        $constant_db = "$db/human_IG_C";
+                        $auxiliary_data = "$db/human_gl.aux";
+		}
 	}
 	elsif($organism eq "rhesus_monkey")
 	{
-		$germline_db_V = "$BALDR_path/resources/IgBLAST_DB/internal_data/rhesus_monkey/rhesus_monkey_V";
-		$germline_db_D = "$BALDR_path/resources/IgBLAST_DB/internal_data/rhesus_monkey/rhesus_monkey_D";
-		$germline_db_J = "$BALDR_path/resources/IgBLAST_DB/internal_data/rhesus_monkey/rhesus_monkey_J";
-		$constant_db = "$BALDR_path/resources/IgBLAST_DB/rhesus_monkey/rhesus_IG_C";
-		$auxiliary_data = "$BALDR_path/resources/IgBLAST_DB/optional_file/rhesus_monkey_gl.aux";
+		if(!$db)
+		{
+			$germline_db_V = "$BALDR_path/resources/IgBLAST_DB/internal_data/rhesus_monkey/rhesus_monkey_V";
+			$germline_db_D = "$BALDR_path/resources/IgBLAST_DB/internal_data/rhesus_monkey/rhesus_monkey_D";
+			$germline_db_J = "$BALDR_path/resources/IgBLAST_DB/internal_data/rhesus_monkey/rhesus_monkey_J";
+			$constant_db = "$BALDR_path/resources/IgBLAST_DB/rhesus_monkey/rhesus_IG_C";
+			$auxiliary_data = "$BALDR_path/resources/IgBLAST_DB/optional_file/rhesus_monkey_gl.aux";
+		}
+		else
+		{
+			$germline_db_V = "$db/rhesus_monkey_V";
+                        $germline_db_D = "$db/rhesus_monkey_D";
+                        $germline_db_J = "$db/rhesus_monkey_J";
+                        $constant_db = "$db/rhesus_monkey_C";
+                        $auxiliary_data = "$db/rhesus_monkey_gl.aux";
+		}
 	}
 	
 	if(-e "$out/IgBLAST/$sample\.$out\.blastout")
@@ -774,6 +798,10 @@ Options:
   --adapter      Path for the Trimmomatic adapter file (e.g. ~/Trimmomatic-0.36/adapters/NexteraPE-PE.fa) (required)
   --trimmomatic  Path for trimmomatic.jar file (e.g. ~/Trimmomatic-0.36/trimmomatic-0.36.jar) (required)
   --igblastn     Path for igblastn (e.g. ~/ncbi-igblast-1.6.1/bin/igblastn) (required)
+  --db		 Path for custom IgBLAST database. The folder should contain the following files: 
+		 human_IG_V.*,human_IG_D.*,human_IG_J.*,human_IG_C.*,human_gl.aux OR
+		 rhesus_monkey_V.*,rhesus_monkey_D.*,rhesus_monkey_J.*,rhesus_monkey_C.*,rhesus_monkey_gl.aux
+		 If any file is not available, it can be copied from resources	 
   --STAR         Path for the STAR binary (required)
   --STAR_index   Path for the STAR aligner genome index
   --BALDR        Path for the BALDR directory (e.g. ~/BALDR) (required)
