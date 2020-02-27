@@ -106,6 +106,7 @@ Options:
 		 If any file is not available, it can be copied from resources	 
   --STAR         Path for the STAR binary (required)
   --STAR_index   Path for the STAR aligner genome index
+  --sharedMemory Flag to indicate if STAR should use LoadAndKeep for shared memory. (Default NoSharedMemory)
   --BALDR        Path for the BALDR directory (e.g. ~/BALDR) (required)
   --memory       Max memory for Trinity (default 32G)
   --threads      number of threads for STAR/bowtie2/Trinity (default 1)
