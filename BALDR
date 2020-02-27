@@ -36,7 +36,8 @@ GetOptions(
   'memory=s' => \my $memory,
   'output' => \my $outdir,
   'version|V' => \ my $version,
-  'help|?' => \my $help
+  'help|?' => \my $help,
+  'sharedMemory|s' => \my $sharedMem
 
 ) or pod2usage(2); # die "Invalid options passed to $0\n";
 
@@ -57,6 +58,14 @@ if(!($method))
 
 if(!($memory)) {$memory = "32G";}
 if(!($threads)) {$threads = 1;}
+if(!($sharedMem)) 
+{
+	$sharedMem = "NoSharedMemory";
+}
+else
+{
+	$sharedMem = "LoadAndKeep";
+}
 
 # Check organism and method
 
@@ -301,8 +310,8 @@ if($method =~/IG-mapped/ || $method=~/FilterNonIG/)
 
 		# Align to reference
 
-		print "$STAR --genomeDir $genomeDir --genomeLoad LoadAndKeep --readFilesIn $input_reads --runThreadN $threads --outStd BAM_SortedByCoordinate --outSAMtype BAM SortedByCoordinate --outSAMmode Full  --limitBAMsortRAM 20000000000 --outSAMattributes All --outSAMstrandField intronMotif --outSAMunmapped Within --outReadsUnmapped Fastx --quantMode GeneCounts --outFileNamePrefix STAR/$sample\.STAR. 1> STAR/$sample\.STAR.sorted.bam\n";
-		my $cmd_star = "$STAR --genomeDir $genomeDir --genomeLoad LoadAndKeep --readFilesIn $input_reads --runThreadN $threads --outStd BAM_SortedByCoordinate --outSAMtype BAM SortedByCoordinate --outSAMmode Full  --limitBAMsortRAM 20000000000 --outSAMattributes All --outSAMstrandField intronMotif --outSAMunmapped Within --outReadsUnmapped Fastx --quantMode GeneCounts --outFileNamePrefix STAR/$sample\.STAR. 1> STAR/$sample\.STAR.sorted.bam";
+		print "$STAR --genomeDir $genomeDir --genomeLoad $sharedMem --readFilesIn $input_reads --runThreadN $threads --outStd BAM_SortedByCoordinate --outSAMtype BAM SortedByCoordinate --outSAMmode Full  --limitBAMsortRAM 20000000000 --outSAMattributes All --outSAMstrandField intronMotif --outSAMunmapped Within --outReadsUnmapped Fastx --quantMode GeneCounts --outFileNamePrefix STAR/$sample\.STAR. 1> STAR/$sample\.STAR.sorted.bam\n";
+		my $cmd_star = "$STAR --genomeDir $genomeDir --genomeLoad $sharedMem --readFilesIn $input_reads --runThreadN $threads --outStd BAM_SortedByCoordinate --outSAMtype BAM SortedByCoordinate --outSAMmode Full  --limitBAMsortRAM 20000000000 --outSAMattributes All --outSAMstrandField intronMotif --outSAMunmapped Within --outReadsUnmapped Fastx --quantMode GeneCounts --outFileNamePrefix STAR/$sample\.STAR. 1> STAR/$sample\.STAR.sorted.bam";
 		my @args = ("bash","-c","$cmd_star");
 		system(@args);
 		
@@ -804,6 +813,7 @@ Options:
 		 If any file is not available, it can be copied from resources	 
   --STAR         Path for the STAR binary (required)
   --STAR_index   Path for the STAR aligner genome index
+  --sharedMemory Flag to indicate if STAR should use LoadAndKeep for shared memory. (Default NoSharedMemory)
   --BALDR        Path for the BALDR directory (e.g. ~/BALDR) (required)
   --memory       Max memory for Trinity (default 32G)
   --threads      number of threads for STAR/bowtie2/Trinity (default 1)
